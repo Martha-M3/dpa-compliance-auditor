@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Dashboard - KenyaDPA Audit</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="brand-mark">
+        <div class="logo-square">K</div>
+        <div>
+          <h1>KenyaDPA Audit</h1>
+          <p>automated dataset compliance</p>
+        </div>
+      </div>
+
+      <nav>
+        <a href="{{ url_for('dashboard.index') }}" class="active">Dashboard</a>
+        <a href="#">Upload Data</a>
+        <a href="#">Audits</a>
+        <a href="#">Reports</a>
+        {% if current_user.role == 'Administrator' %}
+          <a href="#">Compliance Rules</a>
+        {% endif %}
+        <a href="#">Settings</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="dot"></span> DPA (2019)
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <div class="topbar">
+        <h2>Compliance Dashboard</h2>
+        <div class="user-chip">
+          <div class="avatar">{{ current_user.username[0]|upper }}</div>
+          <div>
+            <div class="name">{{ current_user.username }}</div>
+            <div class="role">{{ current_user.role_label }}</div>
+          </div>
+          <a class="logout" href="{{ url_for('auth.logout') }}">Log out</a>
+        </div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flash-list">
+            {% for category, message in messages %}
+              <li class="flash {{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      <div class="greeting">
+        <h3>Habari, {{ current_user.username }}</h3>
+        {% if total_audits == 0 %}
+          <p>No audits have been run yet. Upload a dataset to get started.</p>
+        {% else %}
+          <p>{{ total_audits }} audit{{ 's' if total_audits != 1 }} on record across {{ total_datasets }} dataset{{ 's' if total_datasets != 1 }}.</p>
+        {% endif %}
+      </div>
+
+      <div class="stat-grid">
+
+        <div class="stat-card health">
+          <div class="donut" style="background: {{ health_gradient or 'var(--color-border)' }};">
+            <div class="donut-hole">{{ overall_health ~ '%' if overall_health is not none else '-' }}</div>
+          </div>
+          <div>
+            <div class="label">Overall Health</div>
+            <div class="sub">{{ 'Across ' ~ total_audits ~ ' audits' if total_audits else 'No audits yet' }}</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Total Audits</div>
+          <div class="value">{{ total_audits }}</div>
+          <div class="sub">Runs recorded</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Active Violations</div>
+          <div class="value">{{ active_violations }}</div>
+          <div class="sub">Across all audits</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Datasets Uploaded</div>
+          <div class="value">{{ total_datasets }}</div>
+          <div class="sub">Total on record</div>
+        </div>
+
+      </div>
+
+      <div class="panel-grid">
+
+        <div class="panel">
+          <div class="panel-header">
+            <h4>Recent Audit Results</h4>
+            <a href="#">View All Audits</a>
+          </div>
+
+          {% if recent_audits %}
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Dataset Name</th>
+                  <th>Audit Date</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for audit, dataset in recent_audits %}
+                <tr>
+                  <td>{{ dataset.file_name }}</td>
+                  <td>{{ audit.start_time.strftime('%b %d, %Y') }}</td>
+                  <td>{{ (audit.compliance_score|round(0)|int ~ '%') if audit.compliance_score is not none else '-' }}</td>
+                  <td>
+                    {% if audit.compliance_score is not none and audit.compliance_score >= 80 %}
+                      <span class="badge compliant">Compliant</span>
+                    {% else %}
+                      <span class="badge violations">Action Required</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="empty-state">No audits have been run yet.</div>
+          {% endif %}
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h4>Violations by DPA Category</h4>
+          </div>
+
+          {% if category_breakdown %}
+            <div class="donut donut-large" style="background: {{ category_gradient }};">
+              <div class="donut-hole">{{ total_category_violations }}</div>
+            </div>
+            <ul class="category-legend">
+              {% for cat in category_breakdown %}
+              <li>
+                <span class="name">
+                  <span class="swatch" style="background: {{ cat.color }};"></span>{{ cat.name }}
+                </span>
+                <span>{{ cat.pct }}%</span>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="empty-state">No violations recorded yet.</div>
+          {% endif %}
+        </div>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>
