@@ -19,14 +19,32 @@
       </div>
 
       <nav>
-        <a href="{{ url_for('dashboard.index') }}" class="active">Dashboard</a>
-        <a href="#">Upload Data</a>
-        <a href="#">Audits</a>
-        <a href="#">Reports</a>
+        <a href="{{ url_for('dashboard.index') }}" class="active">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          Upload Data
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+          Audits
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          Reports
+        </a>
         {% if current_user.role == 'Administrator' %}
-          <a href="#">Compliance Rules</a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+          Compliance Rules
+        </a>
         {% endif %}
-        <a href="#">Settings</a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
+          Settings
+        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -36,17 +54,51 @@
 
     <main class="main">
 
-      <div class="topbar">
+      <header class="topbar">
         <h2>Compliance Dashboard</h2>
-        <div class="user-chip">
-          <div class="avatar">{{ current_user.username[0]|upper }}</div>
-          <div>
-            <div class="name">{{ current_user.username }}</div>
-            <div class="role">{{ current_user.role_label }}</div>
-          </div>
-          <a class="logout" href="{{ url_for('auth.logout') }}">Log out</a>
+
+        <div class="topbar-right">
+          <label class="search">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="search" placeholder="Search audits, datasets..." aria-label="Search audits and datasets">
+          </label>
+
+          <details class="menu" name="topbar-menu">
+            <summary class="icon-button" aria-label="Notifications">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              {% if alerts %}<span class="alert-dot"></span>{% endif %}
+            </summary>
+            <div class="menu-panel">
+              <div class="menu-title">Notifications</div>
+              {% if alerts %}
+                <ul class="alert-list">
+                  {% for alert in alerts %}
+                    <li>{{ alert }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="menu-empty">You're all caught up.</div>
+              {% endif %}
+            </div>
+          </details>
+
+          <details class="menu" name="topbar-menu">
+            <summary class="user-chip" aria-label="Account menu">
+              <div class="avatar">{{ current_user.username[0]|upper }}</div>
+              <div class="user-text">
+                <div class="name">{{ current_user.username }}</div>
+                <div class="role">{{ current_user.role_label }}</div>
+              </div>
+            </summary>
+            <div class="menu-panel menu-panel-narrow">
+              <a class="menu-item" href="{{ url_for('auth.logout') }}">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                Log out
+              </a>
+            </div>
+          </details>
         </div>
-      </div>
+      </header>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -58,48 +110,63 @@
         {% endif %}
       {% endwith %}
 
-      <div class="greeting">
+      <section class="greeting">
         <h3>Habari, {{ current_user.username }}</h3>
-        {% if total_audits == 0 %}
-          <p>No audits have been run yet. Upload a dataset to get started.</p>
-        {% else %}
-          <p>{{ total_audits }} audit{{ 's' if total_audits != 1 }} on record across {{ total_datasets }} dataset{{ 's' if total_datasets != 1 }}.</p>
-        {% endif %}
-      </div>
+        <p>{{ status_line }}</p>
+      </section>
 
-      <div class="stat-grid">
+      <section class="stat-grid">
 
         <div class="stat-card health">
-          <div class="donut" style="background: {{ health_gradient or 'var(--color-border)' }};">
-            <div class="donut-hole">{{ overall_health ~ '%' if overall_health is not none else '-' }}</div>
+          <div class="donut donut-health" style="background: {{ health_gradient or 'var(--color-border)' }};">
+            <div class="donut-hole">
+              {% if overall_health is not none %}
+                <span class="donut-value">{{ overall_health }}%</span>
+                <span class="donut-caption">score</span>
+              {% else %}
+                <span class="donut-value">-</span>
+              {% endif %}
+            </div>
           </div>
           <div>
-            <div class="label">Overall Health</div>
-            <div class="sub">{{ 'Across ' ~ total_audits ~ ' audits' if total_audits else 'No audits yet' }}</div>
+            <div class="label">Overall health</div>
+            <div class="health-label">{{ health_label }}</div>
+            <div class="sub">
+              {% if audited_datasets %}Across {{ audited_datasets }} audited dataset{{ 's' if audited_datasets != 1 }}{% else %}No audits yet{% endif %}
+            </div>
           </div>
         </div>
 
         <div class="stat-card">
-          <div class="label">Total Audits</div>
-          <div class="value">{{ total_audits }}</div>
-          <div class="sub">Runs recorded</div>
+          <div class="label">Total audits</div>
+          <div class="value-row">
+            <span class="value">{{ total_audits }}</span>
+            <span class="badge {{ audits_badge.tone }}">{{ audits_badge.text }}</span>
+          </div>
+          <div class="sub">{{ audits_this_week }} processed this week</div>
         </div>
 
         <div class="stat-card">
-          <div class="label">Active Violations</div>
-          <div class="value">{{ active_violations }}</div>
-          <div class="sub">Across all audits</div>
+          <div class="label">Active violations</div>
+          <div class="value-row">
+            <span class="value">{{ active_violations }}</span>
+            <span class="badge {{ violations_badge.tone }}">{{ violations_badge.text }}</span>
+          </div>
+          <div class="sub">{{ high_violations }} high severity, {{ critical_violations }} critical</div>
         </div>
 
         <div class="stat-card">
-          <div class="label">Datasets Uploaded</div>
-          <div class="value">{{ total_datasets }}</div>
-          <div class="sub">Total on record</div>
+          <div class="label">Datasets uploaded</div>
+          <div class="value-row">
+            <span class="value">{{ total_datasets }}</span>
+            <span class="badge {{ datasets_badge.tone }}">{{ datasets_badge.text }}</span>
+          </div>
+          <div class="sub">{{ validated_datasets }} of {{ total_datasets }} validated</div>
         </div>
 
-      </div>
+      </section>
 
-      <div class="panel-grid">
+      <section class="panel-grid">
 
         <div class="panel">
           <div class="panel-header">
@@ -118,18 +185,23 @@
                 </tr>
               </thead>
               <tbody>
-                {% for audit, dataset in recent_audits %}
+                {% for audit in recent_audits %}
                 <tr>
-                  <td>{{ dataset.file_name }}</td>
-                  <td>{{ audit.start_time.strftime('%b %d, %Y') }}</td>
-                  <td>{{ (audit.compliance_score|round(0)|int ~ '%') if audit.compliance_score is not none else '-' }}</td>
                   <td>
-                    {% if audit.compliance_score is not none and audit.compliance_score >= 80 %}
-                      <span class="badge compliant">Compliant</span>
+                    <span class="file-name">
+                      <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                      {{ audit.file_name }}
+                    </span>
+                  </td>
+                  <td>{{ audit.date }}</td>
+                  <td>
+                    {% if audit.score is not none %}
+                      <span class="score {{ audit.tone }}">{{ audit.score }}%</span>
                     {% else %}
-                      <span class="badge violations">Action Required</span>
+                      -
                     {% endif %}
                   </td>
+                  <td><span class="badge {{ audit.tone }}">{{ audit.status }}</span></td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -145,14 +217,20 @@
           </div>
 
           {% if category_breakdown %}
-            <div class="donut donut-large" style="background: {{ category_gradient }};">
-              <div class="donut-hole">{{ total_category_violations }}</div>
+            <div class="category-summary">
+              <div class="donut donut-large" style="background: {{ category_gradient }};">
+                <div class="donut-hole"></div>
+              </div>
+              <div>
+                <div class="category-total">{{ total_category_violations }} Active</div>
+                <div class="sub">Non-compliance items requiring immediate remedy</div>
+              </div>
             </div>
             <ul class="category-legend">
               {% for cat in category_breakdown %}
               <li>
                 <span class="name">
-                  <span class="swatch" style="background: {{ cat.color }};"></span>{{ cat.name }}
+                  <span class="swatch" style="background: {{ cat.color }};"></span>{{ cat.label }}
                 </span>
                 <span>{{ cat.pct }}%</span>
               </li>
@@ -163,7 +241,7 @@
           {% endif %}
         </div>
 
-      </div>
+      </section>
     </main>
   </div>
 </body>
