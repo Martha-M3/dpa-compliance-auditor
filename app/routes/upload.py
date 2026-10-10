@@ -34,14 +34,22 @@ def index():
         return handle_upload()
     return render_page()
 
+def format_size(num_bytes):
+    """12345678 -> '11.8 MB' (for display on the page)."""
+    if num_bytes < 1024:
+        return f"{num_bytes} B"
+    if num_bytes < 1024 * 1024:
+        return f"{num_bytes / 1024:.1f} KB"
+    return f"{num_bytes / (1024 * 1024):.1f} MB"
 
-def render_page(dataset=None, validation=None):
+def render_page(dataset=None, validation=None, file_size=None):
     """The same template shows the empty form, or the form plus a result."""
     recent = Dataset.query.order_by(Dataset.upload_date.desc()).limit(5).all()
     return render_template(
         "upload.html",
         dataset=dataset,
         validation=validation,
+        file_size=file_size,
         recent=recent,
         columns=REQUIRED_COLUMNS,
     )
@@ -103,4 +111,25 @@ def result(dataset_id):
         flash("The stored file for this dataset is missing. Please upload it again.", "error")
         return redirect(url_for("upload.index"))
 
-    return render_page(dataset=dataset, validation=validate_dataset(path))
+    return render_page(dataset=dataset, validation=validate_dataset(path), file_size=format_size(path.stat().st_size))
+
+@upload_bp.route("/upload/<int:dataset_id>/proceed", methods=["POST"])
+@role_required("ComplianceOfficer")
+def proceed(dataset_id):
+    """
+    "Proceed to Automated Compliance Audit". The rule is enforced HERE, on the
+    server, because a disabled button in the browser can be bypassed.
+    """
+    dataset = db.get_or_404(Dataset, dataset_id)
+
+    if not dataset.schema_validated:
+        flash(
+            "This dataset failed validation, so it cannot be audited. "
+            "Fix the file and upload it again.",
+            "error",
+        )
+        return redirect(url_for("upload.result", dataset_id=dataset_id))
+
+    # The audit engine is built in a later step; it will be started from here.
+    flash("Dataset is validated and ready for audit. The audit engine will start from here once it is built.", "success")
+    return redirect(url_for("upload.result", dataset_id=dataset_id))

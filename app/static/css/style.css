@@ -526,3 +526,164 @@ body {
   .stat-grid  { grid-template-columns: repeat(2, 1fr); }
   .panel-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   UPLOAD DATA PAGE
+   ============================================================ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.icon-xl { width: 40px; height: 40px; }
+
+/* ---------- Progress steps ---------- */
+.steps {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 0;
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.step-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.step.active, .step.done { color: var(--color-text); }
+.step.active .step-dot, .step.done .step-dot { background: var(--color-primary); color: white; }
+.step.failed { color: var(--color-text); }
+.step.failed .step-dot { background: var(--color-danger); color: white; }
+.step-line { flex: 1; height: 2px; background: var(--color-border); min-width: 24px; }
+.step-line.filled { background: var(--color-primary); }
+
+/* ---------- Page layout ---------- */
+.upload-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.upload-main, .upload-side { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- Drop zone ---------- */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 36px 20px;
+  background: var(--color-card);
+  border: 2px dashed var(--color-primary);
+  border-radius: var(--radius);
+  text-align: center;
+  cursor: pointer;
+  color: var(--color-primary);
+}
+.dropzone strong { color: var(--color-text); font-size: 15px; margin-top: 6px; }
+.dropzone-hint { font-size: 12px; color: var(--color-text-muted); }
+.dropzone.dragging { background: var(--color-primary-tint); }
+#upload-form:focus-within .dropzone { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.browse-button {
+  margin-top: 10px;
+  padding: 9px 20px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.dropzone:hover .browse-button { background: var(--color-primary-dark); }
+.chosen-file { min-height: 18px; margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--color-text); }
+.upload-submit { margin-top: 12px; }
+.upload-submit:disabled { opacity: 0.6; cursor: default; }
+
+/* ---------- File summary card ---------- */
+.file-card-top { display: flex; align-items: center; gap: 12px; }
+.file-card-top .icon { color: var(--color-primary); flex: none; }
+.file-meta { flex: 1; min-width: 0; }
+.file-title { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.file-meta .sub { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+.file-card-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.file-card-bottom strong { color: var(--color-text); font-weight: 600; overflow-wrap: anywhere; }
+
+/* ---------- Validation checklist ---------- */
+.check-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.check { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+.check .icon { flex: none; margin-top: 1px; }
+.check.pass .icon { color: var(--color-success); }
+.check.fail .icon { color: var(--color-danger); }
+.check-text { flex: 1; min-width: 0; }
+.check-detail { margin-top: 4px; font-size: 12px; line-height: 1.5; color: var(--color-danger); overflow-wrap: anywhere; }
+.check-status { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+.check.pass .check-status { color: var(--color-success); }
+.check.fail .check-status { color: var(--color-danger); }
+.check-note { margin: 14px 0 0; font-size: 12px; color: var(--color-text-muted); }
+
+/* ---------- Proceed button ---------- */
+.proceed-button { margin-top: 0; padding: 14px; font-size: 15px; }
+.proceed-button:disabled { opacity: 0.45; cursor: not-allowed; }
+.proceed-button:disabled:hover { background: var(--color-primary); }
+.proceed-note { margin: -6px 0 0; font-size: 12px; color: var(--color-text-muted); text-align: center; }
+
+/* ---------- Side panels ---------- */
+.side-intro { margin: 0 0 12px; font-size: 12px; color: var(--color-text-muted); line-height: 1.5; }
+.column-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.column-list li { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--color-text-muted); }
+.column-list code {
+  align-self: flex-start;
+  padding: 1px 6px;
+  background: #F1F5F9;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--color-text);
+}
+.recent-list { list-style: none; margin: 0; padding: 0; }
+.recent-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.recent-list li:last-child { border-bottom: none; padding-bottom: 0; }
+.recent-list li:first-child { padding-top: 0; }
+.recent-list a { display: flex; flex-direction: column; min-width: 0; text-decoration: none; color: var(--color-text); }
+.recent-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recent-list a:hover .recent-name { color: var(--color-primary); }
+.recent-list .sub { font-size: 11px; color: var(--color-text-muted); }
+
+@media (max-width: 900px) {
+  .upload-grid { grid-template-columns: 1fr; }
+  .steps { flex-wrap: wrap; }
+}

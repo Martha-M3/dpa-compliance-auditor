@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Data{% endblock %}
+{% block page_title %}Upload Dataset for Automated Audit{% endblock %}
+
+{% block content %}
+  {# What each required column should contain, shown in the side panel. #}
+  {% set hints = {
+    'data_subject_id': 'A unique ID for each person',
+    'consent_status': 'Yes or No',
+    'collection_date': 'YYYY-MM-DD, e.g. 2024-03-31',
+    'retention_period': 'e.g. 5 years, 6 months, 90 days',
+    'record_status': 'Active or Inactive'
+  } %}
+
+  {# The three-step progress bar: each step is blank, active, done or failed. #}
+  {% set step1 = 'active' if not dataset else 'done' %}
+  {% set step2 = '' if not dataset else ('done' if validation.passed else 'failed') %}
+  {% set step3 = 'active' if dataset and validation.passed else '' %}
+
+  <ol class="steps">
+    <li class="step {{ step1 }}"><span class="step-dot">1</span> Upload File</li>
+    <li class="step-line {{ 'filled' if dataset }}"></li>
+    <li class="step {{ step2 }}"><span class="step-dot">2</span> Structure Validate</li>
+    <li class="step-line {{ 'filled' if dataset and validation.passed }}"></li>
+    <li class="step {{ step3 }}"><span class="step-dot">3</span> Run Audit</li>
+  </ol>
+
+  <div class="upload-grid">
+
+    <div class="upload-main">
+
+      <form id="upload-form" method="post" action="{{ url_for('upload.index') }}" enctype="multipart/form-data">
+        <label class="dropzone" id="dropzone" for="dataset-input">
+          <svg class="icon icon-xl" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          <strong>Drag and drop your dataset here</strong>
+          <span class="dropzone-hint">Supports CSV up to 50MB</span>
+          <span class="browse-button">Browse Computer</span>
+          <span class="chosen-file" id="chosen-file" aria-live="polite"></span>
+        </label>
+        <input type="file" id="dataset-input" name="dataset" accept=".csv,text/csv" class="visually-hidden">
+        <button type="submit" class="btn-primary upload-submit" id="upload-button">Upload and Validate</button>
+      </form>
+
+      {% if dataset %}
+        <section class="panel file-card">
+          <div class="file-card-top">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+            <div class="file-meta">
+              <div class="file-title">{{ dataset.file_name }}</div>
+              <div class="sub">{{ file_size }} &bull; CSV Format</div>
+            </div>
+            <span class="badge {{ 'good' if validation.passed else 'bad' }}">
+              {{ 'Validated' if validation.passed else 'Failed' }}
+            </span>
+          </div>
+          <div class="file-card-bottom">
+            <span>Rows: <strong>{{ '{:,}'.format(validation.row_count) if validation.row_count else '-' }}</strong></span>
+            {% if validation.columns %}
+              <span>Columns Detected: <strong>{{ validation.columns|join(', ') }}</strong></span>
+            {% endif %}
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h4>Dataset Structural Validation Results</h4>
+          </div>
+          <ul class="check-list">
+            {% for check in validation.checks %}
+              <li class="check {{ 'pass' if check.passed else 'fail' }}">
+                {% if check.passed %}
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                {% else %}
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                {% endif %}
+                <div class="check-text">
+                  <div>{{ check.name }}</div>
+                  {% if not check.passed %}<div class="check-detail">{{ check.message }}</div>{% endif %}
+                </div>
+                <span class="check-status">{{ 'PASSED' if check.passed else 'FAILED' }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+          {% if validation.checks|length < 5 %}
+            <p class="check-note">Some checks were skipped because of the problem above.</p>
+          {% endif %}
+        </section>
+
+        {% if validation.passed %}
+          <form method="post" action="{{ url_for('upload.proceed', dataset_id=dataset.dataset_id) }}">
+            <button type="submit" class="btn-primary proceed-button">
+              Proceed to Automated Compliance Audit &rarr;
+            </button>
+          </form>
+        {% else %}
+          <button type="button" class="btn-primary proceed-button" disabled>
+            Proceed to Automated Compliance Audit &rarr;
+          </button>
+          <p class="proceed-note">Fix the problems listed above and upload the file again.</p>
+        {% endif %}
+      {% endif %}
+
+    </div>
+
+    <aside class="upload-side">
+
+      <section class="panel">
+        <div class="panel-header">
+          <h4>Required Columns</h4>
+        </div>
+        <p class="side-intro">Your CSV needs a heading row with these five columns.</p>
+        <ul class="column-list">
+          {% for name in columns %}
+            <li>
+              <code>{{ name }}</code>
+              <span>{{ hints[name] }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h4>Recent Uploads</h4>
+        </div>
+        {% if recent %}
+          <ul class="recent-list">
+            {% for item in recent %}
+              <li>
+                <a href="{{ url_for('upload.result', dataset_id=item.dataset_id) }}">
+                  <span class="recent-name">{{ item.file_name }}</span>
+                  <span class="sub">{{ item.upload_date.strftime('%b %d, %Y') }}</span>
+                </a>
+                <span class="badge {{ 'good' if item.schema_validated else 'bad' }}">
+                  {{ 'Validated' if item.schema_validated else 'Failed' }}
+                </span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty-state">No datasets uploaded yet.</div>
+        {% endif %}
+      </section>
+
+    </aside>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}
