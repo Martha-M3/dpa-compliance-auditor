@@ -15,6 +15,7 @@ from flask_login import current_user
 from werkzeug.utils import secure_filename
 
 from app.auditing.dataset_schema import REQUIRED_COLUMNS, validate_dataset
+from app.auditing.runner import run_audit
 from app.decorators import role_required
 from app.extensions import db
 from app.models import Dataset
@@ -130,6 +131,18 @@ def proceed(dataset_id):
         )
         return redirect(url_for("upload.result", dataset_id=dataset_id))
 
-    # The audit engine is built in a later step; it will be started from here.
-    flash("Dataset is validated and ready for audit. The audit engine will start from here once it is built.", "success")
+    # Run the audit. Whatever goes wrong, the user gets a message, not a crash.
+    try:
+        audit, outcome = run_audit(dataset, current_user, stored_path(dataset_id))
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Audit failed for dataset %s", dataset_id)
+        flash("The audit could not be completed. Please try again.", "error")
+        return redirect(url_for("upload.result", dataset_id=dataset_id))
+
+    flash(
+        f"Audit complete: compliance score {audit.compliance_score}%, "
+        f"{len(outcome.findings)} violations found in {outcome.violating_records} records.",
+        "success",
+    )
     return redirect(url_for("upload.result", dataset_id=dataset_id))
