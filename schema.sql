@@ -39,6 +39,7 @@ CREATE TABLE audit_runs (
 CREATE TABLE compliance_rules (
     rule_id         SERIAL PRIMARY KEY,
     obligation_text TEXT NOT NULL,
+    rule_code VARCHAR(30) NOT NULL UNIQUE,
     category        VARCHAR(50) NOT NULL CHECK (category IN ('consent', 'retention')),
     source_section  VARCHAR(100)
 );
