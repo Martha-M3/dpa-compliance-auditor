@@ -22,8 +22,9 @@ def create_app():
 
     from app.routes.auth import auth_bp
     from app.routes.dashboard import dashboard_bp
-
+    from app.routes.upload import upload_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(upload_bp)
 
     return app
