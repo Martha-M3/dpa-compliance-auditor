@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %} - KenyaDPA Audit</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="brand-mark">
+        <div class="logo-square">K</div>
+        <div>
+          <h1>KenyaDPA Audit</h1>
+          <p>automated dataset compliance</p>
+        </div>
+      </div>
+
+      <nav>
+        <a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+          Dashboard
+        </a>
+        {% if current_user.role == 'ComplianceOfficer' %}
+        <a href="{{ url_for('upload.index') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('upload.') }}">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          Upload Data
+        </a>
+        {% endif %}
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+          Audits
+        </a>
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          Reports
+        </a>
+        {% if current_user.role == 'Administrator' %}
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+          Compliance Rules
+        </a>
+        {% endif %}
+        <a href="#">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
+          Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="dot"></span> DPA (2019)
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <header class="topbar">
+        <h2>{% block page_title %}{% endblock %}</h2>
+
+        <div class="topbar-right">
+          <label class="search">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="search" placeholder="Search audits, datasets..." aria-label="Search audits and datasets">
+          </label>
+
+          <details class="menu" name="topbar-menu">
+            <summary class="icon-button" aria-label="Notifications">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              {% if alerts %}<span class="alert-dot"></span>{% endif %}
+            </summary>
+            <div class="menu-panel">
+              <div class="menu-title">Notifications</div>
+              {% if alerts %}
+                <ul class="alert-list">
+                  {% for alert in alerts %}
+                    <li>{{ alert }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="menu-empty">You're all caught up.</div>
+              {% endif %}
+            </div>
+          </details>
+
+          <details class="menu" name="topbar-menu">
+            <summary class="user-chip" aria-label="Account menu">
+              <div class="avatar">{{ current_user.username[0]|upper }}</div>
+              <div class="user-text">
+                <div class="name">{{ current_user.username }}</div>
+                <div class="role">{{ current_user.role_label }}</div>
+              </div>
+            </summary>
+            <div class="menu-panel menu-panel-narrow">
+              <a class="menu-item" href="{{ url_for('auth.logout') }}">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                Log out
+              </a>
+            </div>
+          </details>
+        </div>
+      </header>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flash-list">
+            {% for category, message in messages %}
+              <li class="flash {{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
