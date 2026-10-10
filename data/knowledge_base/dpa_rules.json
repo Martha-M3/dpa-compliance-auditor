@@ -1,0 +1,31 @@
+{
+  "source": "Kenya Data Protection Act, 2019",
+  "rules": [
+    {
+      "rule_code": "CONSENT-01",
+      "category": "consent",
+      "severity": "Critical",
+      "violation_type": "Processing without consent",
+      "source_section": "Sections 30 and 32, Data Protection Act 2019",
+      "obligation_text": "Personal data may only be processed where the data subject has given valid consent, or another lawful basis applies.",
+      "recommendation": "Stop processing the record until consent is obtained, or delete it.",
+      "check": {
+        "type": "field_equals",
+        "field": "consent_status",
+        "value": "No"
+      }
+    },
+    {
+      "rule_code": "RETENTION-01",
+      "category": "retention",
+      "severity": "High",
+      "violation_type": "Retained beyond retention period",
+      "source_section": "Section 39, Data Protection Act 2019",
+      "obligation_text": "Personal data must not be kept longer than is necessary for the purpose it was collected for, and must be deleted or anonymised once that period ends.",
+      "recommendation": "Delete or anonymise the record, since its retention period has ended.",
+      "check": {
+        "type": "retention_expired"
+      }
+    }
+  ]
+}

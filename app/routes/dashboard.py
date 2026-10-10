@@ -154,19 +154,6 @@ def index():
         else {"text": f"{unvalidated_datasets} to validate", "tone": "warn"}
     )
 
-    # --- Notifications (the bell menu) ---
-    alerts = []
-    if needs_review:
-        alerts.append(
-            f"{pluralize(needs_review, 'dataset scored', 'datasets scored')} "
-            "below 50% and needs immediate review."
-        )
-    if unvalidated_datasets:
-        alerts.append(
-            f"{pluralize(unvalidated_datasets, 'dataset has', 'datasets have')} "
-            "not passed schema validation."
-        )
-
     # --- Recent audits table ---
     rows = (
         db.session.query(AuditRun, Dataset)
@@ -238,7 +225,6 @@ def index():
         audits_badge=audits_badge,
         violations_badge=violations_badge,
         datasets_badge=datasets_badge,
-        alerts=alerts,
         recent_audits=recent_audits,
         category_breakdown=category_breakdown,
         category_gradient=category_gradient,
