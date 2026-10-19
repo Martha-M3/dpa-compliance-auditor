@@ -168,6 +168,7 @@ def index():
         status, tone = score_band(score)
         recent_audits.append(
             {
+                "audit_id": audit.audit_id,
                 "file_name": dataset.file_name,
                 "date": audit.start_time.strftime("%b %d, %Y"),
                 "score": round(float(score)) if score is not None else None,

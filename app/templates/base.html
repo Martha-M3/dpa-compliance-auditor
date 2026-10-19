@@ -30,24 +30,28 @@
           Upload Data
         </a>
         {% endif %}
-        <a href="#">
+        <a href="{{ url_for('reports.audits') }}" class="{{ 'active' if request.endpoint == 'reports.detail' }}">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
           Audits
         </a>
-        <a href="#">
+        <a href="{{ url_for('reports.index') }}" class="{{ 'active' if request.endpoint == 'reports.index' }}">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
           Reports
         </a>
+        {# Compliance Rules page (Administrator): not built yet
         {% if current_user.role == 'Administrator' %}
         <a href="#">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
           Compliance Rules
         </a>
         {% endif %}
+        #}
+        {# Settings page: not built yet
         <a href="#">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
           Settings
         </a>
+        #}
       </nav>
 
       <div class="sidebar-footer">

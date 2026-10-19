@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ summary.code }} - Audit Summary</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="print-body">
+
+  {# The toolbar is hidden when the page is printed. #}
+  <div class="print-toolbar">
+    <a href="{{ url_for('reports.index', report=summary.audit_id) }}">&larr; Back to reports</a>
+    <button type="button" class="btn-primary" id="print-button">Print / Save as PDF</button>
+  </div>
+
+  <main class="print-page">
+    <header class="print-header">
+      <div class="print-brand">KenyaDPA Audit</div>
+      <h1>Kenya DPA (2019) Audit Summary</h1>
+      <p class="print-sub">
+        {{ summary.code }} &bull; {{ summary.file_name }} &bull; Audited {{ summary.date }} &bull; Run by {{ summary.run_by }}
+      </p>
+    </header>
+
+    <section class="print-score">
+      <div>
+        <div class="print-label">Compliance score</div>
+        <div class="print-big score {{ summary.tone }}">{{ summary.score ~ '%' if summary.score is not none else '-' }}</div>
+      </div>
+      <div>
+        <div class="print-label">Status</div>
+        <span class="badge {{ summary.tone }}">{{ summary.status }}</span>
+      </div>
+      <div>
+        <div class="print-label">Records</div>
+        <div class="print-num">{{ '{:,}'.format(summary.total_records) if summary.total_records is not none else '-' }}</div>
+      </div>
+      <div>
+        <div class="print-label">Violations</div>
+        <div class="print-num">{{ '{:,}'.format(summary.violations) }}</div>
+      </div>
+      <div>
+        <div class="print-label">Records affected</div>
+        <div class="print-num">{{ '{:,}'.format(summary.violating_records) }}</div>
+      </div>
+    </section>
+
+    <h2>Executive Summary</h2>
+    <p>{{ summary.executive }}</p>
+
+    <h2>Score Breakdown</h2>
+    <table class="print-table">
+      <thead>
+        <tr><th>DPA category</th><th>Score</th><th>Risk</th><th>Violations</th></tr>
+      </thead>
+      <tbody>
+        {% for item in summary.breakdown %}
+          <tr>
+            <td>{{ item.label }}</td>
+            <td>{{ item.score ~ '%' if item.score is not none else '-' }}</td>
+            <td>{% if item.risk %}<span class="rp-risk {{ item.tone }}">{{ item.risk }}</span>{% else %}-{% endif %}</td>
+            <td>{{ '{:,}'.format(item.violations) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>Violations by Severity</h2>
+    <table class="print-table">
+      <thead>
+        <tr>{% for name, count in summary.severity_counts %}<th>{{ name }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        <tr>{% for name, count in summary.severity_counts %}<td>{{ '{:,}'.format(count) }}</td>{% endfor %}</tr>
+      </tbody>
+    </table>
+
+    <h2>Key Recommendations</h2>
+    {% if summary.recommendations %}
+      <ul>
+        {% for text in summary.recommendations %}
+          <li>{{ text }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No action is needed. Run the audit again after the next data update.</p>
+    {% endif %}
+
+    <footer class="print-footer">
+      Generated automatically by the DPA Compliance Auditing System. These findings come from
+      automated rules and should be reviewed by a qualified person before action is taken.
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById("print-button").addEventListener("click", function () { window.print(); });
+    // Open the print dialog straight away: choose "Save as PDF" as the printer.
+    window.addEventListener("load", function () { window.print(); });
+  </script>
+</body>
+</html>

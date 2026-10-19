@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, flash, redirect, url_for
 from flask_login import current_user
 from config import Config
 from app.extensions import db, login_manager
+from app.routes.reports import reports_bp
 
 
 def create_app():
@@ -24,6 +25,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(upload_bp)
+    app.register_blueprint(reports_bp)
     from app.alerts import build_alerts
 
     @app.context_processor
@@ -32,5 +34,15 @@ def create_app():
         if current_user.is_authenticated:
             return {"alerts": build_alerts()}
         return {}
+
+    @app.errorhandler(413)
+    def file_too_large(error):
+        flash("That file is larger than the 50 MB limit.", "error")
+        return redirect(url_for("upload.index"))
+
+    @app.errorhandler(403)
+    def forbidden(error):
+        flash("You do not have permission to open that page.", "error")
+        return redirect(url_for("dashboard.index"))
 
     return app

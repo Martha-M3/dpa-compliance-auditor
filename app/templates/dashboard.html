@@ -66,9 +66,8 @@
         <div class="panel">
           <div class="panel-header">
             <h4>Recent Audit Results</h4>
-            <a href="#">View All Audits</a>
+            <a href="{{ url_for('reports.index') }}">View All Audits</a>
           </div>
-
           {% if recent_audits %}
             <table class="audit-table">
               <thead>
@@ -85,7 +84,7 @@
                   <td>
                     <span class="file-name">
                       <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
-                      {{ audit.file_name }}
+                        <a href="{{ url_for('reports.detail', audit_id=audit.audit_id) }}">{{ audit.file_name }}</a>
                     </span>
                   </td>
                   <td>{{ audit.date }}</td>

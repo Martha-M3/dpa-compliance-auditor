@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KenyaDPA Audit - Log In</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+
+      <div class="brand-mark">
+        <div class="logo-square">K</div>
+        <h1>KenyaDPA Audit</h1>
+        <p>Automated Dataset Compliance Auditor</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flash-list">
+            {% for category, message in messages %}
+              <li class="flash {{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('auth.login') }}">
+
+        <div class="field">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" autocomplete="current-password" required>
+        </div>
+
+        <div class="field">
+          <label>Select System Role</label>
+          <div class="role-toggle">
+            <div class="role-option">
+              <input type="radio" id="role-officer" name="role" value="ComplianceOfficer"
+                     {% if selected_role == 'ComplianceOfficer' %}checked{% endif %}>
+              <label for="role-officer">Compliance Officer</label>
+            </div>
+            <div class="role-option">
+              <input type="radio" id="role-admin" name="role" value="Administrator"
+                     {% if selected_role == 'Administrator' %}checked{% endif %}>
+              <label for="role-admin">Administrator</label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">Proceed to Portal</button>
+      </form>
+
+      <div class="login-footer">
+        Developed by School of Computing &amp; Information Technology<br>
+        Undergraduate Final Year Project (Computer Science)
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

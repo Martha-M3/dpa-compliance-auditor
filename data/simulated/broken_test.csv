@@ -1,0 +1,5 @@
+data_subject_id,consent_status,collection_date,retention_period,record_status
+Customer00001,Yes,2024-03-31,5 years,Active
+Customer00002,Maybe,2024-03-31,5 years,Active
+Customer00003,Yes,31/03/2024,5 yrs,Active
+Customer00004,,2099-01-01,6 months,Retired

@@ -24,6 +24,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
         # Where uploaded datasets are stored: <project>/uploads/datasets/<dataset_id>.csv
     UPLOAD_FOLDER = BASE_DIR / "uploads" / "datasets"
+    POLICY_FOLDER = BASE_DIR / "uploads" / "policies"
 
     # Flask rejects any request bigger than this (50 MB) with an HTTP 413 error,
     # so a huge file can't use up the server's memory.

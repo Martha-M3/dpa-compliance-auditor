@@ -4,10 +4,13 @@ Upload Data page (Figure 4.7, FR-01 / IR-02 / NFR-03).
 Flow:  GET  /upload        -> show the upload form
        POST /upload        -> receive the CSV, validate it, save it, redirect
        GET  /upload/<id>   -> show the validation result for that dataset
+       POST /upload/policy -> receive a policy document (PDF, DOCX or TXT), read its text, save it
 
 Redirecting after a POST (the "Post/Redirect/Get" pattern) means refreshing the
 result page never re-submits the file.
 """
+from pathlib import Path
+
 from flask import (
     Blueprint, current_app, flash, redirect, render_template, request, url_for,
 )
@@ -15,10 +18,11 @@ from flask_login import current_user
 from werkzeug.utils import secure_filename
 
 from app.auditing.dataset_schema import REQUIRED_COLUMNS, validate_dataset
+from app.auditing.policy_reader import ALLOWED_EXTENSIONS, PolicyReadError, read_policy
 from app.auditing.runner import run_audit
 from app.decorators import role_required
 from app.extensions import db
-from app.models import Dataset
+from app.models import Dataset, PolicyDocument
 
 upload_bp = Blueprint("upload", __name__)
 
@@ -28,12 +32,20 @@ def stored_path(dataset_id):
     return current_app.config["UPLOAD_FOLDER"] / f"{dataset_id}.csv"
 
 
+def policy_path(document):
+    """Where a policy file lives on disk: uploads/policies/<id>.<pdf, docx or txt>"""
+    extension = Path(document.file_name).suffix.lower()
+    return current_app.config["POLICY_FOLDER"] / f"{document.document_id}{extension}"
+
+
 @upload_bp.route("/upload", methods=["GET", "POST"])
 @role_required("ComplianceOfficer")
 def index():
     if request.method == "POST":
         return handle_upload()
+
     return render_page()
+
 
 def format_size(num_bytes):
     """12345678 -> '11.8 MB' (for display on the page)."""
@@ -42,6 +54,22 @@ def format_size(num_bytes):
     if num_bytes < 1024 * 1024:
         return f"{num_bytes / 1024:.1f} KB"
     return f"{num_bytes / (1024 * 1024):.1f} MB"
+
+
+def latest_policy():
+    """The most recently uploaded policy document, as a dict for the page (or None)."""
+    document = PolicyDocument.query.order_by(PolicyDocument.upload_date.desc()).first()
+    if document is None:
+        return None
+    path = policy_path(document)
+    return {
+        "name": document.file_name,
+        "size": format_size(path.stat().st_size) if path.exists() else None,
+        "words": len((document.content_text or "").split()),
+        "date": document.upload_date.strftime("%b %d, %Y"),
+        "uploader": document.uploader.username,
+    }
+
 
 def render_page(dataset=None, validation=None, file_size=None):
     """The same template shows the empty form, or the form plus a result."""
@@ -53,7 +81,52 @@ def render_page(dataset=None, validation=None, file_size=None):
         file_size=file_size,
         recent=recent,
         columns=REQUIRED_COLUMNS,
+        policy=latest_policy(),
     )
+
+
+@upload_bp.route("/upload/policy", methods=["POST"])
+@role_required("ComplianceOfficer")
+def upload_policy():
+    """Receive a policy document (FR-02), read its text, and keep both."""
+    uploaded = request.files.get("policy")
+
+    # 1. Did the user choose a file, and is it a supported type? (IR-02)
+    if uploaded is None or uploaded.filename == "":
+        flash("Please choose a policy document to upload.", "error")
+        return redirect(url_for("upload.index"))
+
+    original_name = secure_filename(uploaded.filename) or "policy"
+    extension = Path(original_name).suffix.lower()
+    if extension not in ALLOWED_EXTENSIONS:
+        flash("Only PDF, Word (.docx) and text (.txt) files are accepted for policy documents.", "error")
+        return redirect(url_for("upload.index"))
+
+    # 2. Create the database row first so we know the document's ID.
+    document = PolicyDocument(file_name=original_name[:255], uploaded_by=current_user.user_id)
+    db.session.add(document)
+    db.session.flush()
+
+    # 3. Save the file under that ID, then read the text out of the saved copy.
+    path = policy_path(document)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        uploaded.save(path)
+        document.content_text = read_policy(path, extension)
+    except PolicyReadError as error:
+        db.session.rollback()
+        path.unlink(missing_ok=True)  # do not keep a file we could not use
+        flash(str(error), "error")
+        return redirect(url_for("upload.index"))
+    except OSError:
+        db.session.rollback()
+        path.unlink(missing_ok=True)
+        flash("The file could not be saved on the server. Please try again.", "error")
+        return redirect(url_for("upload.index"))
+
+    db.session.commit()
+    flash(f"Policy document uploaded: {len(document.content_text.split()):,} words read.", "success")
+    return redirect(url_for("upload.index"))
 
 
 def handle_upload():
@@ -112,7 +185,12 @@ def result(dataset_id):
         flash("The stored file for this dataset is missing. Please upload it again.", "error")
         return redirect(url_for("upload.index"))
 
-    return render_page(dataset=dataset, validation=validate_dataset(path), file_size=format_size(path.stat().st_size))
+    return render_page(
+        dataset=dataset,
+        validation=validate_dataset(path),
+        file_size=format_size(path.stat().st_size),
+    )
+
 
 @upload_bp.route("/upload/<int:dataset_id>/proceed", methods=["POST"])
 @role_required("ComplianceOfficer")
@@ -141,8 +219,8 @@ def proceed(dataset_id):
         return redirect(url_for("upload.result", dataset_id=dataset_id))
 
     flash(
-        f"Audit complete: compliance score {audit.compliance_score}%, "
-        f"{len(outcome.findings)} violations found in {outcome.violating_records} records.",
+        f"Audit complete: {len(outcome.findings)} violations found in "
+        f"{outcome.violating_records} records.",
         "success",
     )
-    return redirect(url_for("upload.result", dataset_id=dataset_id))
+    return redirect(url_for("reports.detail", audit_id=audit.audit_id))

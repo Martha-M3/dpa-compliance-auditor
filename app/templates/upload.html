@@ -107,6 +107,37 @@
 
       <section class="panel">
         <div class="panel-header">
+          <h4>Organization Policy Document</h4>
+        </div>
+        <p class="side-intro">Upload the organization's data protection policy. The system reads its text so it can be compared with the Act.</p>
+
+        {% if policy %}
+          <div class="policy-card">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+            <div class="file-meta">
+              <div class="file-title">{{ policy.name }}</div>
+              <div class="sub">
+                {% if policy.size %}{{ policy.size }} &bull; {% endif %}{{ '{:,}'.format(policy.words) }} words
+              </div>
+              <div class="sub">Uploaded {{ policy.date }} by {{ policy.uploader }}</div>
+            </div>
+            <span class="badge good">Text read</span>
+          </div>
+        {% endif %}
+
+        <form id="policy-form" method="post" action="{{ url_for('upload.upload_policy') }}" enctype="multipart/form-data">
+          <label class="policy-action" for="policy-input">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            {{ 'Upload a new version' if policy else 'Choose a policy document' }}
+          </label>
+          <input type="file" id="policy-input" name="policy" accept=".pdf,.docx,.txt" class="visually-hidden">
+          <noscript><button type="submit" class="btn-primary">Upload</button></noscript>
+          <div class="policy-hint">PDF, Word (.docx) or text (.txt)</div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
           <h4>Required Columns</h4>
         </div>
         <p class="side-intro">Your CSV needs a heading row with these five columns.</p>

@@ -41,4 +41,23 @@
     button.disabled = true;
     button.textContent = "Uploading...";
   });
+
+  // Stop a double-click on "Proceed" from starting two audits at once.
+  var proceed = document.querySelector(".proceed-button:not([disabled])");
+  if (proceed) {
+    proceed.form.addEventListener("submit", function () {
+      proceed.disabled = true;
+      proceed.textContent = "Running audit...";
+    });
+  }
+})();
+
+// Policy document: send the form as soon as a file is chosen (no extra button).
+(function () {
+  var form = document.getElementById("policy-form");
+  var input = document.getElementById("policy-input");
+  if (!form || !input) { return; }
+  input.addEventListener("change", function () {
+    if (input.files.length) { form.submit(); }
+  });
 })();

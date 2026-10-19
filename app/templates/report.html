@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Report{% endblock %}
+{% block page_title %}Audit Reports / {{ dataset.file_name }}{% endblock %}
+
+{% block content %}
+
+  {# ---------- Header card: file, date, grade and score ring ---------- #}
+  <section class="panel report-head">
+    <div>
+      <h3 class="report-file">{{ dataset.file_name }}</h3>
+      <p class="report-sub">
+        Audited on {{ audited_at }} against Kenya DPA (2019)
+        &bull; {{ '{:,}'.format(total_records) if total_records is not none else '-' }} records
+        &bull; {{ '{:,}'.format(violating_records) }} with violations
+      </p>
+    </div>
+    <div class="report-grade">
+      <div>
+        <div class="grade-caption">Compliance Grade</div>
+        <div class="grade-label {{ grade_tone }}">{{ grade_label }}</div>
+      </div>
+      <div class="donut donut-health" style="background: {{ gradient or 'var(--color-border)' }};">
+        <div class="donut-hole">
+          {% if score is not none %}
+            <span class="donut-value">{{ score|round|int }}%</span>
+            <span class="donut-caption">score</span>
+          {% else %}
+            <span class="donut-value">-</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# ---------- Active issues by severity ---------- #}
+  <section class="panel issues-bar">
+    <span class="issues-label">Active Issues:</span>
+    {% for name, count in severity_counts %}
+      <span class="issue-chip {{ name|lower }} {{ 'zero' if count == 0 }}">{{ count }} {{ name }}</span>
+    {% endfor %}
+  </section>
+
+  {# ---------- One tab per DPA category (plain links, no JavaScript) ---------- #}
+  <nav class="tabs" aria-label="DPA categories">
+    {% for tab in tabs %}
+      <a href="{{ url_for('reports.detail', audit_id=audit.audit_id, category=tab.key) }}"
+         class="tab {{ 'active' if tab.active }}">
+        {{ tab.label }}
+        <span class="tab-count">{{ tab.count }}</span>
+      </a>
+    {% endfor %}
+  </nav>
+
+  {# ---------- Rule results for the selected tab ---------- #}
+  <section class="panel report-table-panel">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>DPA Requirement</th>
+          <th>Status</th>
+          <th>Automated Findings &amp; Recommendation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rule_rows %}
+          <tr>
+            <td class="req-title">
+              {{ row.title }}
+              <div class="req-section">{{ row.section }}</div>
+            </td>
+            <td>
+              <span class="badge {{ 'good' if row.passed else 'bad' }}">{{ 'Pass' if row.passed else 'Fail' }}</span>
+            </td>
+            <td>
+              {% if row.passed %}
+                <div>No violations found.</div>
+              {% else %}
+                <div>{{ '{:,}'.format(row.count) }} active record{{ 's' if row.count != 1 }} violate this requirement.</div>
+              {% endif %}
+              <div class="req-obligation">{{ row.obligation }}</div>
+              {% if not row.passed %}
+                <div class="req-reco">Recommendation: {{ row.recommendation }}</div>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  {# ---------- Affected records ---------- #}
+  <section class="panel">
+    <div class="panel-header">
+      <h4>Affected Records</h4>
+      <span class="sub">{{ '{:,}'.format(records.total) }} in this category</span>
+    </div>
+
+    {% if records.items %}
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Record ID</th>
+            <th>Violation</th>
+            <th>Severity</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in records.items %}
+            <tr>
+              <td><code>{{ item.record_id }}</code></td>
+              <td>{{ item.violation_type }}</td>
+              <td><span class="badge {{ 'bad' if item.severity == 'Critical' else 'warn' }}">{{ item.severity }}</span></td>
+              <td class="record-detail">{{ item.description }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% if records.pages > 1 %}
+        <div class="pager">
+          {% if records.has_prev %}
+            <a href="{{ url_for('reports.detail', audit_id=audit.audit_id, category=selected, page=records.prev_num) }}">&larr; Previous</a>
+          {% else %}
+            <span class="disabled">&larr; Previous</span>
+          {% endif %}
+          <span>Page {{ records.page }} of {{ records.pages }}</span>
+          {% if records.has_next %}
+            <a href="{{ url_for('reports.detail', audit_id=audit.audit_id, category=selected, page=records.next_num) }}">Next &rarr;</a>
+          {% else %}
+            <span class="disabled">Next &rarr;</span>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">No affected records in this category.</div>
+    {% endif %}
+  </section>
+
+{% endblock %}
