@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create account - KenyaDPA Audit</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <main class="login-page">
+    <div class="login-card">
+
+      <div class="brand-mark">
+        <div class="logo-square">K</div>
+        <h1>Create your account</h1>
+        <p>Sign up as a Compliance Officer to start auditing datasets.</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flash-list">
+            {% for category, message in messages %}
+              <li class="flash {{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      <form method="post" action="{{ url_for('auth.register') }}">
+        <div class="field">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" value="{{ form.username }}"
+                 autocomplete="username" minlength="3" maxlength="50" required autofocus>
+        </div>
+
+        <div class="field">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" value="{{ form.email }}"
+                 autocomplete="email" required>
+          <p class="field-hint">Use your Google email if you want to sign in with the Google button later.</p>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" autocomplete="new-password"
+                 minlength="{{ min_length }}" required>
+          <p class="field-hint">At least {{ min_length }} characters.</p>
+        </div>
+
+        <div class="field">
+          <label for="confirm">Confirm password</label>
+          <input type="password" id="confirm" name="confirm" autocomplete="new-password"
+                 minlength="{{ min_length }}" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Create account</button>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a class="link-small" href="{{ url_for('auth.login') }}">Sign in</a></p>
+    </div>
+  </main>
+</body>
+</html>
