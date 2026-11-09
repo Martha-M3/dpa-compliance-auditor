@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}System Logs{% endblock %}
+{% block page_title %}Admin / System Logs{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <div><h4>Activity</h4><span class="sub">Who did what, newest first. Passwords and file contents are never recorded.</span></div>
+      <form method="get" class="adm-filter">
+        <select name="action" class="adm-select" onchange="this.form.submit()" aria-label="Filter by action">
+          <option value="">All actions</option>
+          {% for a in actions %}<option value="{{ a }}" {{ 'selected' if a == selected }}>{{ a }}</option>{% endfor %}
+        </select>
+      </form>
+    </div>
+    <table class="rp-table adm-table">
+      <thead><tr><th>Time (UTC)</th><th>User</th><th>Action</th><th>Detail</th></tr></thead>
+      <tbody>
+        {% for e in entries.items %}
+          <tr>
+            <td>{{ e.logged_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>{{ e.username or '-' }}</td>
+            <td><code>{{ e.action }}</code></td>
+            <td>{{ e.detail }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="muted-text">Nothing has been recorded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="pager">
+      <span>Page {{ entries.page }} of {{ entries.pages or 1 }}</span>
+      <span>
+        {% if entries.has_prev %}<a href="{{ url_for('admin.logs', page=entries.prev_num, action=selected) }}">&larr; Newer</a>{% endif %}
+        {% if entries.has_next %}<a href="{{ url_for('admin.logs', page=entries.next_num, action=selected) }}">Older &rarr;</a>{% endif %}
+      </span>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,35 @@
+# Tells Render how to run the project: one website plus one database, both on the free plan.
+databases:
+  - name: dpa-db
+    plan: free
+    databaseName: dpa_compliance_db
+    user: dpa_user
+
+services:
+  - type: web
+    name: dpa-compliance-auditor
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # First make sure the tables exist, then start the site.
+    startCommand: python scripts/init_db.py && gunicorn wsgi:app --workers 1 --threads 4 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dpa-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: BEHIND_PROXY
+        value: "1"
+      - key: COOKIE_SECURE
+        value: "1"
+      # The first Administrator. Fill ADMIN_PASSWORD in on Render's Environment page (it is not stored here).
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

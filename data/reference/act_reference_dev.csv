@@ -1,0 +1,65 @@
+reference,type,concerns_consent,concerns_retention,text_start
+Section 25,OBLIGATION,Y,Y,Every data controller or data processor shall ensure that personal data is — (a) processed
+Section 26,RIGHT,N,N,A data subject has a right — (a) to be informed of the use to which their personal data is
+Section 27,OTHER,N,N,A right conferred on a data subject may be exercised— (a) where the data subject is a mino
+Section 28(1),OBLIGATION,N,N,A data controller or data processor shall collect personal data directly from the data sub
+Section 28(2),OTHER,Y,N,"Despite sub-section (1), personal data may be collected indirectly where — (a) the data is"
+Section 28(3),OBLIGATION,N,N,"A data controller or data processor shall collect, store or use personal data for a purpos"
+Section 29,OBLIGATION,N,N,"A data controller or data processor shall, before collecting personal data, in so far as p"
+Section 30(1),OBLIGATION,Y,N,"A data controller or data processor shall not process personal data, unless — (a) the data"
+Section 30(2),OBLIGATION,N,N,Further processing of personal data shall be in accordance with the purpose of collection.
+Section 30(3),OTHER,N,N,A data controller who contravenes the provisions of sub-section (1) commits an offence.
+Section 31(1),OBLIGATION,N,N,Where a processing operation is likely to result in high risk to the rights and freedoms o
+Section 31(2),OBLIGATION,N,N,A shall include the following — (a) a systematic description of the envisaged processing o
+Section 31(3),OBLIGATION,N,N,The data controller or data processor shall consult the Data Commissioner prior to the pro
+Section 31(4),OTHER,N,N,"For the purposes of this section, a "" "" means an assessment of the impact of the envisaged"
+Section 31(5),OBLIGATION,N,N,The data impact assessment reports shall be submitted sixty days prior to the processing o
+Section 31(6),OBLIGATION,N,N,The Data Commissioner shall set out guidelines for carrying out an impact assessment under
+Section 32(1),OBLIGATION,Y,N,A data controller or data processor shall bear the burden of proof for establishing a data
+Section 32(2),RIGHT,Y,N,"Unless otherwise provided under this Act, a data subject shall have the right to withdraw "
+Section 32(3),OTHER,Y,N,The withdrawal of consent under sub-section (2) shall not affect the lawfulness of process
+Section 32(4),OBLIGATION,Y,N,"In determining whether consent was freely given, account shall be taken of whether, among "
+Section 33(1),OBLIGATION,Y,N,"Every c.L.,ta controller or data processor shall not process personal data :.elating to a "
+Section 33(2),OBLIGATION,Y,N,A data controller or data processor shall incorporate appropriate mechanisms for age verif
+Section 33(3),OBLIGATION,N,N,Mechanisms contemplated under sub-section (2) shall be determined on the basis of— (a) ava
+Section 33(4),OTHER,Y,N,A data controller or data processor that exclusively provides counselling or child protect
+Section 34(1),OBLIGATION,N,N,"A data controller or data processor shall, at the request of a data subject, restrict the "
+Section 34(2),OBLIGATION,Y,N,Where processing of personal data is restricted under this section— (a) the personal data 
+Section 34(3),OBLIGATION,N,Y,The data controller or data processor shall implement mechanisms to ensure that time limit
+Section 35(1),RIGHT,N,N,Every data subject has a right not to be subject to a decision based solely on automated p
+Section 35(2),OTHER,Y,N,"Sub-section (1) shall not apply where the decision is (a) necessary for entering into, or "
+Section 35(3),OBLIGATION,N,N,"Where a data controller or data processor takes a decision, which produces legal effects o"
+Section 35(4),OBLIGATION,N,N,"A data controller or data processor, upon receipt of a request under sub-section (3), shal"
+Section 35(5),OTHER,N,N,The Cabinet Secretary may by Regulations make such further provision to provide suitable m
+Section 36,RIGHT,N,N,"A data subject has a right to object to the processing of their personal data, unless the "
+Section 37(1),OBLIGATION,Y,N,"A person shall not use, for commercial purposes, personal data obtained pursuant to the pr"
+Section 37(2),OBLIGATION,N,N,"A data controller or data processor that uses personal data for commercial purposes shall,"
+Section 37(3),OTHER,N,N,"The Cabinet Secretary, in consultation with the Data Commissioner, may prescribe practice "
+Section 38(1),RIGHT,N,N,"A data subject has the right to receive personal data concerning them in a structured, com"
+Section 38(2),RIGHT,N,N,"A data subject has the right to transmit the data obtained under sub-section (1), to anoth"
+Section 38(3),RIGHT,N,N,"Where technically possible, the data subject shall have the right to have the personal dat"
+Section 38(4),OTHER,N,N,Where data controller or data processor declines to comply with a request under sub-sectio
+Section 38(5),OTHER,N,N,The right under this section shall not apply in circumstances where — (a) processing may b
+Section 38(6),OBLIGATION,N,N,"A data controller or data processor shall comply with data portability requests, at reason"
+Section 38(7),OTHER,N,N,"Where the portability request is complex or numerous, the period under sub-section (6) may"
+Section 39(1),OBLIGATION,Y,Y,A data controller or data processor shall retain personal data only as long as may be reas
+Section 39(2),OBLIGATION,N,Y,"A data controller or data processor shall delete, erase, anonymise or pseudonymise persona"
+Section 40(1),RIGHT,N,Y,A data subject may request a data controller or data processor — (a) to rectify without un
+Section 40(2),OBLIGATION,N,Y,Where the data controller has shared the personal data with a third party for processing p
+Section 40(3),OBLIGATION,N,Y,Where a data controller or data processor is required to rectify or erase personal data un
+Section 41(1),OBLIGATION,N,N,Every data controller or data processor shall implement appropriate technical and organisa
+Section 41(2),OTHER,N,N,The duty under subsection (1) applies both at the time of the determination of the means o
+Section 41(3),OBLIGATION,N,N,A data controller or data processor shall implement appropriate technical and organisation
+Section 41(4),OBLIGATION,N,N,"To give effect to this section, the data controller or data processor shall consider measu"
+Section 42(1),OBLIGATION,N,N,"In determining the appropriate measures referred to in section 41, in particular, where th"
+Section 42(2),OBLIGATION,N,N,Where a data controller is using the services of a data processor — (a) the data controlle
+Section 42(3),OTHER,N,N,Where a data processor processes personal data other than as instructed by the data contro
+Section 42(4),OBLIGATION,N,N,A data controller or data processor shall take all reasonable steps to ensure that any per
+Section 43(1),OBLIGATION,N,N,"Where personal data has been accessed or acquired by an unauthorised person, and there is "
+Section 43(2),OBLIGATION,N,N,"Where the notification to the Data Commissioner is not made within seventy-two hours, the "
+Section 43(3),OBLIGATION,N,N,"Where a data processor becomes aware of a personal data breach, the data processor shall n"
+Section 43(4),OTHER,N,N,The data controller may delay or restrict communication referred to under subsection (1) (
+Section 43(5),OBLIGATION,N,N,The notification and communication referred to under subsection (1) shall provide sufficie
+Section 43(6),OTHER,N,N,The communication of a breach to the data subject shall not be required where the data con
+Section 43(7),OTHER,N,N,Where and to the extent that it is not possible to provide all the information mentioned i
+Section 43(8),OBLIGATION,N,N,The data controller shall record the following information in relation to a personal data 

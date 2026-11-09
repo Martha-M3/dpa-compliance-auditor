@@ -41,6 +41,45 @@
     {% endfor %}
   </section>
 
+  {# ---------- Policy alignment: what the organisation's policy says about each topic of the Act ---------- #}
+  <section class="panel policy-panel">
+    <div class="panel-header">
+      <h4>Policy Alignment</h4>
+      {% if policy %}<span class="sub">{{ policy[0].policy_name }}</span>{% endif %}
+    </div>
+    {% if policy %}
+      <table class="report-table">
+        <thead>
+          <tr><th>DPA topic</th><th>Result</th><th>Closest policy statement</th></tr>
+        </thead>
+        <tbody>
+          {% for item in policy %}
+            <tr>
+              <td>
+                <strong>{{ item.category }}</strong>
+                <div class="req-section">{{ item.section }}</div>
+              </td>
+              <td><span class="badge {{ item.tone }}">{{ item.verdict }}</span></td>
+              <td>
+                {% if item.statement %}
+                  <span class="policy-quote">&ldquo;{{ item.statement }}&rdquo;</span>
+                  <div class="req-section">Similarity {{ '%.2f'|format(item.similarity) }}</div>
+                {% else %}
+                  <span class="muted-text">No statement in the policy matches this topic.</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="policy-note">Matching is automatic and approximate. It shows where a policy appears to address
+        a topic. A person should read the statement before relying on the result.</p>
+    {% else %}
+      <p class="muted-text">No policy document was uploaded when this audit ran, so the policy was not compared
+        with the Act. Upload a policy on the Upload Data page and audit again.</p>
+    {% endif %}
+  </section>
+
   {# ---------- One tab per DPA category (plain links, no JavaScript) ---------- #}
   <nav class="tabs" aria-label="DPA categories">
     {% for tab in tabs %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from "_avatar.html" import avatar %}
+
+{% block title %}User Management{% endblock %}
+{% block page_title %}Admin / User Management{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <div><h4>Accounts</h4><span class="sub">{{ users|length }} accounts. A deactivated account cannot sign in, but its audits and uploads are kept.</span></div>
+      <a class="btn-small" href="{{ url_for('admin.new_user') }}">+ Add User</a>
+    </div>
+    <table class="rp-table adm-table">
+      <thead><tr><th>User</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th></th></tr></thead>
+      <tbody>
+        {% for u in users %}
+          <tr class="{{ '' if u.active else 'row-off' }}">
+            <td><div class="adm-user">{{ avatar(u, 'avatar') }}<span>{{ u.display_name }}</span></div></td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email or '-' }}</td>
+            <td>{{ roles.get(u.role, u.role) }}</td>
+            <td><span class="badge {{ 'good' if u.active else 'muted' }}">{{ 'Active' if u.active else 'Deactivated' }}</span></td>
+            <td>{{ u.created_at.strftime('%b %d, %Y') }}</td>
+            <td><div class="adm-actions">
+              <a class="link-small" href="{{ url_for('admin.edit_user', user_id=u.user_id) }}">Edit</a>
+              {% if u.user_id != current_user.user_id %}
+                <form method="post" action="{{ url_for('admin.toggle_user', user_id=u.user_id) }}">
+                  <button type="submit" class="link-button {{ 'danger' if u.active }}">{{ 'Deactivate' if u.active else 'Reactivate' }}</button>
+                </form>
+              {% endif %}
+            </div></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

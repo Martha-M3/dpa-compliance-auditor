@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Compliance Rules{% endblock %}
+{% block page_title %}Admin / Compliance Rules Management{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <h4>DPA Rule Matrix Mapping</h4>
+        <span class="sub">Switch rules on or off, edit them, or add new ones. Rules that check data are applied to every audit; every rule is also compared with the organisation's policy.</span>
+      </div>
+      <a class="btn-small" href="{{ url_for('admin.new_rule') }}">+ Add New Rule</a>
+    </div>
+    <table class="rp-table adm-table">
+      <thead>
+        <tr><th>Rule ID</th><th>Category</th><th>Rule name / description</th><th>Applied to</th><th>Severity</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for rule in rules %}
+          <tr class="{{ '' if rule.enabled else 'row-off' }}">
+            <td><code>{{ rule.rule_code }}</code></td>
+            <td>{{ categories.get(rule.category, rule.category) }}</td>
+            <td>
+              <strong>{{ rule.violation_type or rule.rule_code }}</strong>
+              <div class="req-section">{{ rule.obligation_text[:160] }}{{ '...' if rule.obligation_text|length > 160 }}</div>
+              <div class="req-section">{{ rule.source_section }}</div>
+            </td>
+            <td>{{ 'Dataset records and policy' if rule.is_dataset_rule else 'Policy documents' }}</td>
+            <td><span class="issue-chip {{ (rule.severity or 'medium')|lower }}">{{ rule.severity or '-' }}</span></td>
+            <td>
+              <form method="post" action="{{ url_for('admin.toggle_rule', rule_id=rule.rule_id) }}">
+                <button type="submit" class="switch {{ 'on' if rule.enabled }}" aria-label="{{ 'Switch off' if rule.enabled else 'Switch on' }} {{ rule.rule_code }}"
+                        aria-pressed="{{ 'true' if rule.enabled else 'false' }}"><span></span></button>
+              </form>
+            </td>
+            <td><a class="link-small" href="{{ url_for('admin.edit_rule', rule_id=rule.rule_id) }}">Edit</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel adm-section">
+    <div class="panel-header">
+      <div>
+        <h4>Rule candidates extracted from the Act</h4>
+        <span class="sub">Found by the language-processing step (spaCy). They are proposals: approve the ones that are correct and they become rules compared with policy documents.</span>
+      </div>
+    </div>
+    {% if candidates %}
+      <table class="rp-table adm-table">
+        <thead><tr><th>Source</th><th>Who must do what</th><th>Text of the Act</th><th>Confidence</th><th></th></tr></thead>
+        <tbody>
+          {% for c in candidates %}
+            <tr>
+              <td><code>{{ c.candidate_code }}</code><div class="req-section">{{ categories.get(c.category, c.category) }}</div></td>
+              <td>{{ c.actor or '-' }}<div class="req-section">{{ c.modality }}: {{ c.action or '-' }}</div></td>
+              <td>{{ c.obligation_text[:280] }}{{ '...' if c.obligation_text|length > 280 }}</td>
+              <td>{{ '%.1f'|format(c.confidence) }}</td>
+              <td><div class="adm-actions">
+                <form method="post" action="{{ url_for('admin.review_candidate', code=c.candidate_code, decision='approve') }}"><button class="btn-small" type="submit">Approve</button></form>
+                <form method="post" action="{{ url_for('admin.review_candidate', code=c.candidate_code, decision='reject') }}"><button class="btn-small ghost" type="submit">Reject</button></form>
+              </div></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted-text">No candidates are waiting for review. To extract them from the Act, run <code>python scripts/extract_rules_from_act.py</code>.</p>
+    {% endif %}
+  </section>
+
+  <h3 class="adm-heading">System Performance &amp; Monitoring</h3>
+  <div class="adm-cards">
+    {% for card in cards %}
+      <div class="panel adm-card">
+        <div class="adm-card-label">{{ card.label }}</div>
+        <div class="adm-card-value">{{ card.value }}</div>
+        <div class="adm-card-note">{{ card.note }}</div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

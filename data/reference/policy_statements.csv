@@ -1,0 +1,61 @@
+split,label,statement
+dev,consent,We obtain the explicit consent of every customer before we collect or use their personal data.
+dev,consent,Customers may withdraw their consent at any time by contacting our data protection officer.
+dev,consent,No personal data is processed unless the individual has given consent for the specified purpose.
+dev,consent,We keep a record of when and how each data subject gave consent.
+dev,consent,Written agreement is requested from parents or guardians before we handle children's information.
+dev,consent,Customers are asked to opt in before receiving marketing messages from us.
+dev,consent,"Where consent is the legal basis, we can demonstrate that the person agreed to the processing."
+dev,consent,Permission is obtained from patients before their details are shared with any third party.
+dev,consent,Individuals can change their mind and stop us using their information whenever they wish.
+dev,consent,Consent forms are stored securely and checked during internal audits.
+dev,retention,Personal data is retained only for as long as necessary for the purpose for which it was collected.
+dev,retention,Customer records are deleted five years after the end of the contract.
+dev,retention,When the retention period expires the data is erased or anonymised.
+dev,retention,Our retention schedule specifies how long each category of record is kept.
+dev,retention,Old files are destroyed securely once they are no longer required.
+dev,retention,We review stored data every year and remove anything that is out of date.
+dev,retention,Job applicants' details are kept for six months and then permanently removed.
+dev,retention,Backups containing personal data are overwritten after ninety days.
+dev,retention,Personal data that is no longer needed is pseudonymised or deleted.
+dev,retention,Records must not be kept longer than the legal minimum unless the law requires it.
+dev,none,Access to customer databases is restricted to authorised staff using strong passwords.
+dev,none,All personal data is encrypted in transit and at rest.
+dev,none,Data breaches are reported to the Data Commissioner within seventy-two hours.
+dev,none,Staff receive annual training on data protection awareness.
+dev,none,Customers have the right to request a copy of their personal data.
+dev,none,Our offices are open from eight in the morning to five in the evening.
+dev,none,We transfer personal data outside Kenya only to countries with adequate safeguards.
+dev,none,The company is committed to protecting the privacy of its customers.
+dev,none,A data protection officer has been appointed and their contact details are published.
+dev,none,CCTV cameras are installed at the entrance for the safety of visitors.
+test,consent,Before any personal data is used for a new purpose we ask the person for their consent again.
+test,consent,"A data subject's consent must be freely given, specific and informed."
+test,consent,Employees must not process personal data of customers who have declined consent.
+test,consent,Withdrawal of consent is honoured within seven days.
+test,consent,We seek the approval of the individual before collecting their biometric details.
+test,consent,Patients sign a consent form at registration.
+test,consent,Users tick a box to agree to our terms of data use at sign-up.
+test,consent,No marketing is sent to people who have not opted in.
+test,consent,Evidence of consent is kept for as long as the data is processed.
+test,consent,Consent is recorded in the customer management system with a date and time.
+test,retention,Employee files are retained for seven years after employment ends.
+test,retention,Data that has passed its retention date is flagged for deletion by the records manager.
+test,retention,We do not hold personal information indefinitely.
+test,retention,Expired records are erased from all systems within thirty days.
+test,retention,Medical records are kept for the period required by law and then destroyed.
+test,retention,At the end of the retention period personal data is anonymised for statistical use.
+test,retention,Inactive accounts are closed and their data deleted after two years.
+test,retention,Information is stored only while it is needed to provide the service.
+test,retention,The retention period for each dataset is documented and approved by management.
+test,retention,Paper records are shredded when their retention period is over.
+test,none,Our website uses cookies to improve the browsing experience.
+test,none,Suppliers must sign a confidentiality agreement before receiving any information.
+test,none,Customers may lodge a complaint with the Office of the Data Protection Commissioner.
+test,none,Laptops are protected with encryption and remote wipe capability.
+test,none,Personal data must be accurate and kept up to date.
+test,none,We conduct a data protection impact assessment for high-risk processing.
+test,none,Visitors must sign the register at reception.
+test,none,The finance team prepares monthly management reports.
+test,none,Only data that is necessary for each purpose is collected.
+test,none,Incident response procedures are tested twice a year.

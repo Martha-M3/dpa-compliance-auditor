@@ -18,6 +18,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from app import google_auth
+from app.activity import log_event
 from app.extensions import db
 from app.mailer import send_email
 from app.models import User
@@ -53,12 +54,21 @@ def login():
         password = request.form.get("password", "")
         user = User.query.filter_by(username=username).first()
         if user is None or not user.check_password(password):
+            log_event("login_failed", f"username '{username[:50]}'")
+            db.session.commit()
             flash("Incorrect username or password.", "error")
             return render_login(selected_role)
         if user.role != selected_role:
             flash(f"This account is not registered as {ROLE_NAMES.get(selected_role, selected_role)}.", "error")
             return render_login(selected_role)
+        if not user.is_active:
+            log_event("login_refused", f"{user.username}: account deactivated", user=user)
+            db.session.commit()
+            flash("This account has been deactivated. Contact an administrator.", "error")
+            return render_login(selected_role)
         login_user(user)
+        log_event("login", "password", user=user)
+        db.session.commit()
         return redirect(url_for("dashboard.index"))
     return render_login(selected_role)
 
@@ -66,6 +76,8 @@ def login():
 @auth_bp.route("/logout")
 @login_required
 def logout():
+    log_event("logout")
+    db.session.commit()
     logout_user()
     flash("You have been logged out.", "success")
     return redirect(url_for("auth.login"))
@@ -117,6 +129,8 @@ def register():
                 db.session.rollback()
                 error = "That username or email is already in use. Please try different ones."
             else:
+                log_event("user_registered", user.username, user=user)
+                db.session.commit()
                 flash("Your account has been created. You can now sign in.", "success")
                 return redirect(url_for("auth.login"))
 
@@ -202,6 +216,7 @@ def reset_password(token):
             flash("The two passwords do not match.", "error")
         else:
             user.set_password(password)
+            log_event("password_reset", user.username, user=user)
             db.session.commit()
             flash("Your password has been updated. You can now sign in.", "success")
             return redirect(url_for("auth.login"))
@@ -255,5 +270,10 @@ def google_callback():
         flash(f"No account is registered for {email}. Ask an administrator to add you.", "error")
         return redirect(url_for("auth.login"))
 
+    if not user.is_active:
+        flash("This account has been deactivated. Contact an administrator.", "error")
+        return redirect(url_for("auth.login"))
     login_user(user)
+    log_event("login", "google", user=user)
+    db.session.commit()
     return redirect(url_for("dashboard.index"))

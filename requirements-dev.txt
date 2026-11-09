@@ -1,0 +1,7 @@
+# For development: the website, the tests, the data generator and the language-processing scripts.
+-r requirements.txt
+pytest>=8.0
+Faker>=30.0
+spacy>=3.8
+scikit-learn>=1.5
+# After installing, download the English model once:   python -m spacy download en_core_web_sm

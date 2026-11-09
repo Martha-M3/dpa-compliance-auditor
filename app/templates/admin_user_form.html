@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit user' if user else 'Add user' }}{% endblock %}
+{% block page_title %}Admin / {{ 'Edit ' ~ user.username if user else 'Add User' }}{% endblock %}
+
+{% block content %}
+  <section class="panel adm-form">
+    <form method="post" autocomplete="off">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" value="{{ values.username }}" maxlength="50" required>
+        {% if user %}<p class="field-hint">Changing the username changes what this person types to sign in.</p>{% endif %}
+      </div>
+      <div class="field">
+        <label for="full_name">Full name</label>
+        <input type="text" id="full_name" name="full_name" value="{{ values.full_name }}" maxlength="150">
+      </div>
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" value="{{ values.email }}" required>
+        <p class="field-hint">Used for password-reset e-mails and for signing in with Google.</p>
+      </div>
+      <div class="field">
+        <label for="role">Role</label>
+        <select id="role" name="role" class="adm-select">
+          {% for key, label in roles.items() %}<option value="{{ key }}" {{ 'selected' if values.role == key }}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="password">{{ 'New password (leave empty to keep the current one)' if user else 'Temporary password' }}</label>
+        <input type="password" id="password" name="password" autocomplete="new-password" {{ '' if user else 'required' }}>
+        <p class="field-hint">At least 8 characters. Ask the person to change it from their profile page.</p>
+      </div>
+      <div class="adm-buttons">
+        <button type="submit" class="btn-primary pf-save">{{ 'Save changes' if user else 'Create account' }}</button>
+        <a class="link-small" href="{{ url_for('admin.users') }}">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit rule' if rule else 'Add rule' }}{% endblock %}
+{% block page_title %}Admin / {{ 'Edit ' ~ rule.rule_code if rule else 'Add New Rule' }}{% endblock %}
+
+{% block content %}
+  <section class="panel adm-form">
+    <form method="post">
+      <div class="field">
+        <label for="category">Category</label>
+        {% if rule and rule.is_dataset_rule %}
+          <input type="text" id="category" value="{{ categories.get(values.category, values.category) }}" readonly class="pf-readonly">
+          <p class="field-hint">This rule checks dataset records, so its category cannot be changed.</p>
+        {% else %}
+          <select id="category" name="category" class="adm-select">
+            {% for key, label in categories.items() %}<option value="{{ key }}" {{ 'selected' if values.category == key }}>{{ label }}</option>{% endfor %}
+          </select>
+        {% endif %}
+      </div>
+      <div class="field">
+        <label for="violation_type">Rule name</label>
+        <input type="text" id="violation_type" name="violation_type" value="{{ values.violation_type }}" maxlength="100" required>
+      </div>
+      <div class="field">
+        <label for="obligation_text">Obligation (what the Act requires)</label>
+        <textarea id="obligation_text" name="obligation_text" rows="4" required class="adm-textarea">{{ values.obligation_text }}</textarea>
+        <p class="field-hint">This text is compared with the sentences of an organisation's policy document.</p>
+      </div>
+      <div class="field">
+        <label for="source_section">Source section</label>
+        <input type="text" id="source_section" name="source_section" value="{{ values.source_section }}" maxlength="100" placeholder="Section 39, Data Protection Act 2019">
+      </div>
+      <div class="field">
+        <label for="severity">Severity</label>
+        <select id="severity" name="severity" class="adm-select">
+          {% for s in severities %}<option {{ 'selected' if values.severity == s }}>{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="recommendation">Recommendation</label>
+        <textarea id="recommendation" name="recommendation" rows="3" required class="adm-textarea">{{ values.recommendation }}</textarea>
+      </div>
+      <div class="adm-buttons">
+        <button type="submit" class="btn-primary pf-save">Save rule</button>
+        <a class="link-small" href="{{ url_for('admin.rules') }}">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

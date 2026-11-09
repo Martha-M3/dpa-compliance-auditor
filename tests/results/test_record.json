@@ -1,0 +1,392 @@
+{
+  "TC-A01": {
+    "observed": "Redirected to /dashboard; the dashboard then opened (200).",
+    "outcome": "passed",
+    "test": "test_valid_login"
+  },
+  "TC-A02": {
+    "observed": "Both attempts showed 'Incorrect username or password.' (the same text, so the page does not reveal which usernames exist); /dashboard stayed locked.",
+    "outcome": "passed",
+    "test": "test_wrong_password_and_unknown_user_give_same_message"
+  },
+  "TC-A03": {
+    "observed": "Refused: 'This account is not registered as an Administrator.' No session was created.",
+    "outcome": "passed",
+    "test": "test_wrong_role_is_refused"
+  },
+  "TC-A04": {
+    "observed": "All 5 protected pages (/dashboard, /upload, /reports, /audits, /profile) redirected to /login.",
+    "outcome": "passed",
+    "test": "test_anonymous_users_are_sent_to_login"
+  },
+  "TC-A05": {
+    "observed": "GET /upload, POST /upload and POST /upload/policy each redirected to the dashboard with a 'no permission' message; no dataset was created.",
+    "outcome": "passed",
+    "test": "test_administrator_cannot_use_officer_functions"
+  },
+  "TC-A06": {
+    "observed": "Dashboard opened (200) before logging out and redirected to login (302) afterwards.",
+    "outcome": "passed",
+    "test": "test_logout_locks_the_session"
+  },
+  "TC-A07": {
+    "observed": "Account created. Although the form was sent with role=Administrator, the stored role was ComplianceOfficer.",
+    "outcome": "passed",
+    "test": "test_registration_always_creates_compliance_officer"
+  },
+  "TC-A08": {
+    "observed": "All 6 invalid sign-ups were refused with a message (short username; bad email; short password; passwords differ; duplicate username in other case; duplicate email in other case); the users table still held 2 rows.",
+    "outcome": "passed",
+    "test": "test_registration_validation"
+  },
+  "TC-A09": {
+    "observed": "The new password worked for sign-in. Using the same link a second time was refused and redirected to 'forgot password'.",
+    "outcome": "passed",
+    "test": "test_reset_link_sets_new_password_and_works_once"
+  },
+  "TC-A10": {
+    "observed": "A link with its last characters changed and a link older than the allowed age were both refused.",
+    "outcome": "passed",
+    "test": "test_tampered_and_expired_reset_links_are_refused"
+  },
+  "TC-A11": {
+    "observed": "Registered and unregistered addresses produced the identical message.",
+    "outcome": "passed",
+    "test": "test_forgot_password_does_not_reveal_accounts"
+  },
+  "TC-A12": {
+    "observed": "Google replies were simulated. registered verified email: signed in; unregistered email: refused; unverified email: refused; wrong state value: refused.",
+    "outcome": "passed",
+    "test": "test_google_sign_in_rules"
+  },
+  "TC-D01": {
+    "observed": "With no audits: 0 audits, no score, and the page said 'No audits have been run yet'.",
+    "outcome": "passed",
+    "test": "test_empty_system_dashboard"
+  },
+  "TC-D02": {
+    "observed": "1 audit; 2 violations (all Critical); health score 75%; top category Consent Management.",
+    "outcome": "passed",
+    "test": "test_dashboard_figures_match_stored_results"
+  },
+  "TC-D03": {
+    "observed": "Dataset 'same.csv' was audited 3 times and 'other.csv' once (4 audit runs). The dashboard showed 6 current violations (2 + 4), not 10; health 62% (mean of 75 and 50); 6 violations in the category chart.",
+    "outcome": "passed",
+    "test": "test_dashboard_counts_each_dataset_once"
+  },
+  "TC-E01": {
+    "observed": "1 finding: CONSENT-01, severity Critical.",
+    "outcome": "passed",
+    "test": "test_consent_missing_and_active_is_critical"
+  },
+  "TC-E02": {
+    "observed": "0 findings and score 100.00 for an Inactive record without consent and an expired Inactive record.",
+    "outcome": "passed",
+    "test": "test_inactive_records_are_not_audited"
+  },
+  "TC-E03": {
+    "observed": "Expiry yesterday: 1 violation. Expiry today: none. Expiry tomorrow: none.",
+    "outcome": "passed",
+    "test": "test_retention_boundaries_around_today"
+  },
+  "TC-E04": {
+    "observed": "0 findings.",
+    "outcome": "passed",
+    "test": "test_expired_period_but_inactive_is_compliant"
+  },
+  "TC-E05": {
+    "observed": "2024-02-29 + 1 year = 2025-02-28. Not a violation on 2025-02-28; a violation on 2025-03-01.",
+    "outcome": "passed",
+    "test": "test_leap_day_collection_date"
+  },
+  "TC-E06": {
+    "observed": "2023-08-31 + 6 months = 2024-02-29; 2023-01-31 + 1 month = 2023-02-28 (end of month, not an invalid date).",
+    "outcome": "passed",
+    "test": "test_month_end_arithmetic"
+  },
+  "TC-E07": {
+    "observed": "90 days, 1 year, 2 YEARS and 6 month were all read correctly (singular, plural and capitals).",
+    "outcome": "passed",
+    "test": "test_period_units"
+  },
+  "TC-E08": {
+    "observed": "2 findings, 1 violating record; score 50.00 (the record counted once).",
+    "outcome": "passed",
+    "test": "test_two_violations_on_one_record"
+  },
+  "TC-E09": {
+    "observed": "10 clean records: 100.00. 3 of 10 violating: 70.00. 10 of 10: 0.00. 1 of 3: 66.67 (rounded to two places).",
+    "outcome": "passed",
+    "test": "test_score_arithmetic"
+  },
+  "TC-E10": {
+    "observed": "' NO ' and ' active ' were treated as No and Active; 1 finding.",
+    "outcome": "passed",
+    "test": "test_text_variations_tolerated"
+  },
+  "TC-E11": {
+    "observed": "A third rule added to the JSON file alone was loaded and applied: 1 finding (TEST-99). No Python was changed.",
+    "outcome": "passed",
+    "test": "test_new_rule_added_through_json_only"
+  },
+  "TC-E12": {
+    "observed": "Both refused with RuleError. missing key: Rule CONSENT-01 is missing: severity / unknown check: Rule CONSENT-01 uses an unknown check type.",
+    "outcome": "passed",
+    "test": "test_incomplete_rules_are_refused"
+  },
+  "TC-E13": {
+    "observed": "The knowledge base provided 2 rules: CONSENT-01 (consent, Critical) and RETENTION-01 (retention, High).",
+    "outcome": "passed",
+    "test": "test_two_rules_loaded_from_knowledge_base"
+  },
+  "TC-E14": {
+    "observed": "Precision and recall were 100% for both rules in every dataset. default 5,000 records: CONSENT-01 expected 458, found 458, matched 458, RETENTION-01 expected 409, found 409, matched 409; score 83.52 | heavily non-compliant 2,000 records: CONSENT-01 expected 898, found 898, matched 898, RETENTION-01 expected 612, found 612, matched 612; score 39.7 | fully compliant 1,000 records: CONSENT-01 expected 0, found 0, matched 0, RETENTION-01 expected 0, found 0, matched 0; score 100.0",
+    "outcome": "passed",
+    "test": "test_engine_matches_answer_key"
+  },
+  "TC-F01": {
+    "observed": "Validation + audit of 5,000 records: runs=30, min=0.245s, mean=0.292s, p95=0.325s, max=0.331s; 100% of runs within 30 s.",
+    "outcome": "passed",
+    "test": "test_engine_with_5000_records"
+  },
+  "TC-F02": {
+    "observed": "Upload, validation, audit and saving of results for 5,000 records (test database): runs=10, min=0.499s, mean=0.592s, p95=0.709s, max=0.709s; 100% of runs within 30 s.",
+    "outcome": "passed",
+    "test": "test_whole_web_workflow_with_5000_records"
+  },
+  "TC-F03": {
+    "observed": "Stress run, 10 times the required workload: validation + audit of 50,000 records took 2.36 s (8666 violations found).",
+    "outcome": "passed",
+    "test": "test_stress_with_50000_records"
+  },
+  "TC-M01": {
+    "observed": "Five admin pages: anonymous visitors went to the sign-in page, a Compliance Officer was sent back to the dashboard, an Administrator opened all five. A Compliance Officer's attempt to switch a rule was refused.",
+    "outcome": "passed",
+    "test": "test_admin_pages_are_for_administrators_only"
+  },
+  "TC-M02": {
+    "observed": "With CONSENT-01 switched off a dataset holding a consent violation scored 100; switched on again it scored 80. Both switches were written to the log. With both data rules off the audit was refused with 'No audit rules are switched on' and no audit run was created.",
+    "outcome": "passed",
+    "test": "test_switching_rules_changes_the_audit"
+  },
+  "TC-M03": {
+    "observed": "A rule with a too-short obligation was refused. A valid one became CUSTOM-01 (origin manual, policy-only, enabled). Its severity was edited to Low. An attempt to move the data rule CONSENT-01 to another category was ignored.",
+    "outcome": "passed",
+    "test": "test_adding_and_editing_rules"
+  },
+  "TC-M04": {
+    "observed": "Two extracted candidates were listed. One was approved (it became an enabled, policy-only rule with origin 'extracted'), one was rejected (no rule created). Reviewing the approved one a second time was refused. Neither appeared in the waiting list afterwards.",
+    "outcome": "passed",
+    "test": "test_reviewing_candidates"
+  },
+  "TC-M05": {
+    "observed": "A new account was created (and refused for a short password, a duplicate username in another case and a duplicate e-mail). An Administrator then changed its username and role and set a new password; the person could sign in with the new details.",
+    "outcome": "passed",
+    "test": "test_user_management"
+  },
+  "TC-M06": {
+    "observed": "An Administrator could not deactivate themselves or demote the last active Administrator. A deactivated Compliance Officer who was signed in was signed out at the next request and refused at sign-in; after reactivation sign-in worked again.",
+    "outcome": "passed",
+    "test": "test_user_safeguards_and_deactivation"
+  },
+  "TC-M07": {
+    "observed": "After a sign-in, an upload and an audit the log listed 'login', 'dataset_uploaded' and 'audit_run'; the filter showed only audit entries; a failed sign-in was logged as 'login_failed'; no password appeared in any entry.",
+    "outcome": "passed",
+    "test": "test_activity_log"
+  },
+  "TC-M08": {
+    "observed": "The rules page showed four monitoring cards: audits today (1 after one audit), average processing time, time since start, and active users (1 administrator, 1 compliance officer).",
+    "outcome": "passed",
+    "test": "test_monitoring_cards"
+  },
+  "TC-N01": {
+    "observed": "The 4 x 4 cosine similarity matrix of the plain-Python TF-IDF matched scikit-learn's to within 0.0e+00.",
+    "outcome": "passed",
+    "test": "test_tfidf_matches_scikit_learn"
+  },
+  "TC-N02": {
+    "observed": "Seven word forms (deleted, erasure, destroyed, retention, permission, withdraw, consented) were each mapped to the right concept word; stop words were dropped.",
+    "outcome": "passed",
+    "test": "test_word_forms_and_domain_concepts"
+  },
+  "TC-N03": {
+    "observed": "Security and accuracy statements did not pass the retention gate; 'kept for six months' (weak word plus a time cue) and 'opt in' passed their gates.",
+    "outcome": "passed",
+    "test": "test_concept_gate"
+  },
+  "TC-N04": {
+    "observed": "A policy with a deletion sentence and a consent sentence: both topics 'Addressed'. A policy about opening hours: 'Not found' with no statement quoted. An empty policy: 'Not found'.",
+    "outcome": "passed",
+    "test": "test_assess_verdicts"
+  },
+  "TC-N05": {
+    "observed": "Numbered and bulleted lines and sentences were separated and their markers removed; a 2-word fragment was dropped. Result: 4 statements.",
+    "outcome": "passed",
+    "test": "test_statement_splitting"
+  },
+  "TC-N06": {
+    "observed": "The reader located all 75 sections and read 182 provisions from 73 of them (Sections 71 and 75 hold no provisions to read). Section 39 gave two provisions; page headers and margin notes were absent from their text.",
+    "outcome": "passed",
+    "test": "test_act_reader"
+  },
+  "TC-N09": {
+    "observed": "The candidate file holds 17 proposed rules, including Sections 30(1), 32(1), 39(1) and 39(2); each has a category and the text of the Act.",
+    "outcome": "passed",
+    "test": "test_candidate_file"
+  },
+  "TC-N10": {
+    "observed": "On the 30 test statements, in 600 balanced test policies: consent: baseline accuracy 66% (P 64%, R 73%) vs proposed 75% (P 67%, R 100%); retention: baseline accuracy 51% (P 51%, R 73%) vs proposed 86% (P 78%, R 100%).",
+    "outcome": "passed",
+    "test": "test_policy_comparison_accuracy_beats_plain_tfidf"
+  },
+  "TC-N11": {
+    "observed": "With a policy that mentions consent and retention: two findings were saved (consent and retention, both 'Addressed') with the quoted statement and the policy file name; the audit page showed the Policy Alignment panel.",
+    "outcome": "passed",
+    "test": "test_policy_findings_saved_with_audit"
+  },
+  "TC-N12": {
+    "observed": "An audit with no policy saved no findings and the page said so. After a policy that omits retention was uploaded, a 100% dataset got consent 'Addressed' and retention 'Not found', and its status was 'Review' instead of 'Compliant'.",
+    "outcome": "passed",
+    "test": "test_policy_gap_gives_review_status_and_absent_policy_gives_none"
+  },
+  "TC-P01": {
+    "observed": "Details saved with spaces tidied. Refused: bad phone, bad email, email of another user, name too long. Empty boxes were stored as no value and the name fell back to the username.",
+    "outcome": "passed",
+    "test": "test_profile_details_and_validation"
+  },
+  "TC-P02": {
+    "observed": "Wrong current password, short password, mismatch and unchanged password were each refused; a valid change was saved and the old password stopped working.",
+    "outcome": "passed",
+    "test": "test_password_change_rules"
+  },
+  "TC-P03": {
+    "observed": "Accepted PNG, JPG, WEBP (by file content, not by name). Refused text renamed .png, SVG, GIF, 3 MB image. Only 1 photo file remained on disk after 3 replacements.",
+    "outcome": "passed",
+    "test": "test_profile_photo_accepts_real_images_only"
+  },
+  "TC-P04": {
+    "observed": "The photo was served to a signed-in user (200), redirected to login for an anonymous visitor, 404 for an unknown user; after 'Remove picture' it returned 404 and the file was deleted from disk.",
+    "outcome": "passed",
+    "test": "test_photo_access_and_removal"
+  },
+  "TC-R01": {
+    "observed": "Both roles opened the audit page. It listed the 2 affected records (Customer00001, Customer00002), their rule and the recommended action.",
+    "outcome": "passed",
+    "test": "test_audit_page_lists_findings_and_recommendations"
+  },
+  "TC-R02": {
+    "observed": "The printable summary contained the executive summary, score breakdown, severity table, recommendations and the score 75% (2 of 8 records violating).",
+    "outcome": "passed",
+    "test": "test_summary_page_content"
+  },
+  "TC-R03": {
+    "observed": "Without filters both audits were listed. Filtering by dataset name, by 'Critical Violations' and by 'Compliant' each returned only the matching audit. Unknown report numbers returned 404.",
+    "outcome": "passed",
+    "test": "test_reports_list_filters_and_unknown_ids"
+  },
+  "TC-R04": {
+    "observed": "The PDF download returned a real PDF file (2,952 bytes) named REP-001-audit-summary.pdf containing the title, file name, score 75%, category breakdown and recommendations. An unknown report gave 'not found'; an anonymous visitor was sent to sign in.",
+    "outcome": "passed",
+    "test": "test_pdf_report"
+  },
+  "TC-S01": {
+    "observed": "A 54% audit was labelled 'Action Required' on the audit page, reports list, dashboard and printable summary; the old labels 'Partially Compliant' and 'Mainly Compliant' no longer appear. Band edges 80, 50 behaved as specified. (Regression test for DEF-04.)",
+    "outcome": "passed",
+    "test": "test_status_labels_agree_on_every_page"
+  },
+  "TC-U01": {
+    "observed": "Dataset 1 stored with schema_validated = True; file saved as 1.csv; the result page opened (200).",
+    "outcome": "passed",
+    "test": "test_valid_upload_is_stored_as_validated"
+  },
+  "TC-U02": {
+    "observed": "Stored with schema_validated = False. Forcing the 'proceed' request was refused by the server with 'failed validation, so it cannot be audited'; 0 audit runs exist.",
+    "outcome": "passed",
+    "test": "test_invalid_upload_cannot_be_audited"
+  },
+  "TC-U03": {
+    "observed": "A .xlsx file was refused ('Only CSV files are accepted'); a submission with no file was refused ('Please choose a CSV file'); 0 datasets stored.",
+    "outcome": "passed",
+    "test": "test_non_csv_and_missing_file_are_rejected"
+  },
+  "TC-U04": {
+    "observed": "With the limit lowered to 1 KB, a larger file was refused with 'larger than the 50 MB limit' and nothing was stored.",
+    "outcome": "passed",
+    "test": "test_oversized_upload_is_refused"
+  },
+  "TC-U05": {
+    "observed": "A .txt, a .docx and a .pdf policy were accepted; the text stored for each contained the policy sentence ('Consent is recorded before any personal data...').",
+    "outcome": "passed",
+    "test": "test_policy_documents_in_three_formats"
+  },
+  "TC-U06": {
+    "observed": "All 5 refused with a specific message (scanned PDF with no text; too short text file; unsupported type; damaged Word file; damaged PDF); no database row and no file was left behind.",
+    "outcome": "passed",
+    "test": "test_unusable_policy_files_are_refused"
+  },
+  "TC-V01": {
+    "observed": "All 5 checks passed; 50 rows read.",
+    "outcome": "passed",
+    "test": "test_valid_dataset_passes"
+  },
+  "TC-V02": {
+    "observed": "Rejected. Missing column(s): retention_period.",
+    "outcome": "passed",
+    "test": "test_missing_column_is_named"
+  },
+  "TC-V03": {
+    "observed": "Rejected. 'consent_status' is empty in row 4.",
+    "outcome": "passed",
+    "test": "test_blank_cell_row_identified"
+  },
+  "TC-V04": {
+    "observed": "Rejected. 'consent_status' must be Yes or No (check row 2); 'record_status' must be Active or Inactive (check row 3).",
+    "outcome": "passed",
+    "test": "test_invalid_consent_and_status_values"
+  },
+  "TC-V05": {
+    "observed": "All rejected, each naming collection_date: 31/03/2024, 2024-02-30, 2999-01-01, yesterday.",
+    "outcome": "passed",
+    "test": "test_invalid_dates"
+  },
+  "TC-V06": {
+    "observed": "All rejected, each naming retention_period: five years, 5 yrs, -3 years, 5, years.",
+    "outcome": "passed",
+    "test": "test_invalid_retention_periods"
+  },
+  "TC-V07": {
+    "observed": "No exception; each rejected with a message. empty file: The file is empty. / headings only: The file has column headings but no data rows. / not UTF-8: The file is not a valid UTF-8 text file. Save it as CSV (UTF-8) and try again. / random binary: The file is not a valid UTF-8 text file. Save it as CSV (UTF-8) and try again.",
+    "outcome": "passed",
+    "test": "test_unreadable_files_do_not_crash"
+  },
+  "TC-V08": {
+    "observed": "Accepted: upper-case headings, stray spaces and a byte-order mark were normalised.",
+    "outcome": "passed",
+    "test": "test_heading_case_spaces_and_bom_tolerated"
+  },
+  "TC-V09": {
+    "observed": "Rejected. The message listed 5 example rows and '(and 25 more)' instead of 30 lines.",
+    "outcome": "passed",
+    "test": "test_error_examples_are_capped"
+  },
+  "TC-V10": {
+    "observed": "Accepted; identifier 00123 is read as text (no conversion to 123).",
+    "outcome": "passed",
+    "test": "test_file_with_text_numbers_keeps_leading_zeros"
+  },
+  "TC-W01": {
+    "observed": "Upload, validation and audit completed. Stored: 1 audit run (score 50.00, end time set), 4 audit results linked to the run and to a rule, 1 report record, 2 rules synchronised from the knowledge base. The audit page opened (200).",
+    "outcome": "passed",
+    "test": "test_full_audit_workflow_is_saved"
+  },
+  "TC-W02": {
+    "observed": "A failure was forced inside the engine. The user saw 'The audit could not be completed'; 0 audit runs, 0 results and 0 reports were left in the database.",
+    "outcome": "passed",
+    "test": "test_failed_audit_leaves_nothing_half_saved"
+  },
+  "TC-W03": {
+    "observed": "Auditing the same dataset twice created 2 separate audit runs with different ids.",
+    "outcome": "passed",
+    "test": "test_repeat_audit_keeps_history"
+  }
+}

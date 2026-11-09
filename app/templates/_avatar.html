@@ -1,0 +1,9 @@
+{# A round picture for a user: their uploaded photo, or their first letter if they have none.
+   Use:  {{ avatar(user, 'avatar') }}   (the second word picks the size, see style.css) #}
+{% macro avatar(user, css_class='avatar') -%}
+  {% if user.photo_filename -%}
+    <img class="{{ css_class }} avatar-photo" src="{{ url_for('account.photo', user_id=user.user_id, v=user.photo_filename) }}" alt="">
+  {%- else -%}
+    <div class="{{ css_class }}">{{ user.display_name[0]|upper }}</div>
+  {%- endif %}
+{%- endmacro %}

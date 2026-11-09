@@ -110,7 +110,7 @@
       {% if summary %}
         <div class="rp-preview-head">
           <h4>Preview: {{ summary.code }}</h4>
-          <a class="rp-download" href="{{ url_for('reports.summary', audit_id=summary.audit_id) }}" target="_blank" rel="noopener">
+          <a class="rp-download" href="{{ url_for('reports.pdf', audit_id=summary.audit_id) }}">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
             Download PDF
           </a>
@@ -150,6 +150,8 @@
         </div>
 
         <a class="rp-full" href="{{ url_for('reports.detail', audit_id=summary.audit_id) }}">View full audit &rarr;</a>
+        &nbsp;&bull;&nbsp;
+        <a class="rp-full" href="{{ url_for('reports.summary', audit_id=summary.audit_id) }}" target="_blank" rel="noopener">Print view</a>
       {% else %}
         <div class="empty-state">Select a report to see its summary here.</div>
       {% endif %}

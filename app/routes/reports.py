@@ -8,15 +8,17 @@ import csv
 import re
 from datetime import datetime, timedelta
 
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import login_required
 from sqlalchemy import func
 
-from app.auditing.engine import load_rules
+from app import rules_store
+from app.pdf_report import build_pdf
 from app.extensions import db
 from app.models import AuditResult, AuditRun, ComplianceRule, Dataset
-from app.routes.dashboard import CATEGORY_STYLE, TONE_COLORS, health_band, score_band
+from app.routes.dashboard import CATEGORY_STYLE, TONE_COLORS
 from app.routes.upload import stored_path
+from app.status import has_policy_gap, risk_band, score_status
 
 reports_bp = Blueprint("reports", __name__)
 
@@ -58,13 +60,25 @@ def audits():
     return redirect(url_for("reports.detail", audit_id=latest.audit_id))
 
 
-def risk_band(score):
-    """Risk label and tone for one category score (same thresholds as the overall health)."""
-    if score >= 80:
-        return "Low Risk", "good"
-    if score >= 65:
-        return "Moderate Risk", "warn"
-    return "High Risk", "bad"
+POLICY_TONE = {"Addressed": "good", "Partly addressed": "warn", "Not found": "bad"}
+
+
+def policy_rows(audit):
+    """What the policy comparison found for this audit, ready for the templates."""
+    rows = []
+    for f in sorted(audit.policy_findings, key=lambda f: f.finding_id):
+        label = CATEGORY_STYLE.get(f.category, {"label": f.category.capitalize()})["label"]
+        rows.append({
+            "category": label,
+            "verdict": f.verdict,
+            "tone": POLICY_TONE.get(f.verdict, "muted"),
+            "similarity": float(f.similarity) if f.similarity is not None else None,
+            "statement": f.best_statement,
+            "obligation": f.rule.obligation_text if f.rule else "",
+            "section": f.rule.source_section if f.rule else "",
+            "policy_name": f.policy.file_name if f.policy else "",
+        })
+    return rows
 
 
 def build_summary(audit):
@@ -72,7 +86,7 @@ def build_summary(audit):
     Everything the preview panel and the printable summary show for one audit:
     an executive summary, a score for each DPA category, and recommendations.
     """
-    rules = load_rules()
+    rules = rules_store.dataset_rules(enabled_only=False)
     total = count_records(stored_path(audit.dataset_id))
     score = float(audit.compliance_score) if audit.compliance_score is not None else None
 
@@ -141,7 +155,7 @@ def build_summary(audit):
             f"violations affecting {violating_records:,} records. Most findings are under "
             f"{worst['label']} ({worst['violations']:,}). By severity: {by_severity}."
         )
-    status, tone = score_band(score)
+    status, tone = score_status(score, has_policy_gap(audit))
     if score is not None:
         executive += f" The compliance score is {round(score)}%."
 
@@ -161,6 +175,7 @@ def build_summary(audit):
         "violations": violations,
         "violating_records": violating_records,
         "total_records": total,
+        "policy": policy_rows(audit),
     }
 
 
@@ -203,7 +218,7 @@ def index():
     rows = []
     for audit in audits.items:
         score = float(audit.compliance_score) if audit.compliance_score is not None else None
-        status, tone = score_band(score)
+        status, tone = score_status(score, has_policy_gap(audit))
         rows.append(
             {
                 "href": url_for("reports.index", report=audit.audit_id, page=page, **keep),
@@ -244,11 +259,21 @@ def summary(audit_id):
     return render_template("report_summary.html", summary=build_summary(audit))
 
 
+@reports_bp.route("/reports/<int:audit_id>/pdf")
+@login_required
+def pdf(audit_id):
+    """The audit summary as a downloadable PDF file (IR-06)."""
+    audit = db.get_or_404(AuditRun, audit_id)
+    data = build_pdf(build_summary(audit))
+    return Response(data, mimetype="application/pdf",
+                    headers={"Content-Disposition": f'attachment; filename="REP-{audit_id:03d}-audit-summary.pdf"'})
+
+
 @reports_bp.route("/reports/<int:audit_id>")
 @login_required
 def detail(audit_id):
     audit = db.get_or_404(AuditRun, audit_id)
-    rules = load_rules()
+    rules = rules_store.dataset_rules(enabled_only=False)
 
     # --- The tabs: one per rule category, in the order the rules file lists them ---
     category_keys = []
@@ -318,7 +343,7 @@ def detail(audit_id):
     if score is None:
         grade_label, grade_tone, gradient = "In progress", "muted", None
     else:
-        grade_label, grade_tone = health_band(round(score))
+        grade_label, grade_tone = score_status(round(score), has_policy_gap(audit))
         gradient = (
             f"conic-gradient({TONE_COLORS[grade_tone]} 0% {score}%, "
             f"var(--color-border) {score}% 100%)"
@@ -341,4 +366,5 @@ def detail(audit_id):
         selected=selected,
         rule_rows=rule_rows,
         records=records,
+        policy=policy_rows(audit),
     )

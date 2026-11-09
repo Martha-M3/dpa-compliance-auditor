@@ -76,6 +76,24 @@
       </tbody>
     </table>
 
+    <h2>Policy Alignment</h2>
+    {% if summary.policy %}
+      <table class="print-table">
+        <thead><tr><th>DPA topic</th><th>Result</th><th>Closest policy statement</th></tr></thead>
+        <tbody>
+          {% for item in summary.policy %}
+            <tr>
+              <td>{{ item.category }}</td>
+              <td>{{ item.verdict }}</td>
+              <td>{% if item.statement %}&ldquo;{{ item.statement }}&rdquo;{% else %}None found{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No policy document was compared when this audit ran.</p>
+    {% endif %}
+
     <h2>Key Recommendations</h2>
     {% if summary.recommendations %}
       <ul>

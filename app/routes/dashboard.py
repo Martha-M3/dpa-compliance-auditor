@@ -2,10 +2,11 @@ from datetime import datetime, timedelta
 
 from flask import Blueprint, render_template
 from flask_login import login_required
-from sqlalchemy import func
+from sqlalchemy import func, select
 
 from app.extensions import db
 from app.models import AuditRun, Dataset, AuditResult, ComplianceRule
+from app.status import has_policy_gap, score_status
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -23,36 +24,27 @@ TONE_COLORS = {
 }
 
 
-def score_band(score):
-    """Status label and tone for a single audit score."""
-    if score is None:
-        return "In progress", "muted"
-    if score >= 80:
-        return "Compliant", "good"
-    if score >= 50:
-        return "Action Required", "warn"
-    return "Critical Violations", "bad"
-
-
-def health_band(score):
-    """Label and tone for the overall health score."""
-    if score >= 80:
-        return "Compliant", "good"
-    if score >= 65:
-        return "Mainly Compliant", "warn"
-    if score >= 50:
-        return "Partially Compliant", "warn"
-    return "Non-Compliant", "bad"
-
-
 def pluralize(n, one, many):
     return f"{n} {one if n == 1 else many}"
+
+
+def latest_audit_ids():
+    """
+    The id of the most recent audit of each dataset.
+
+    A dataset can be audited many times (for example after it is corrected). Only its
+    latest audit describes its current state, so the figures that add up violations or
+    average scores must use these audits only; otherwise one dataset audited three times
+    would be counted three times.
+    """
+    return select(func.max(AuditRun.audit_id)).group_by(AuditRun.dataset_id)
 
 
 @dashboard_bp.route("/dashboard")
 @login_required
 def index():
     week_ago = datetime.utcnow() - timedelta(days=7)
+    latest = latest_audit_ids()
 
     # --- Audit counts ---
     total_audits = db.session.query(func.count(AuditRun.audit_id)).scalar() or 0
@@ -69,7 +61,7 @@ def index():
     # Datasets that have an audit scoring below 50 need urgent attention.
     needs_review = (
         db.session.query(func.count(func.distinct(AuditRun.dataset_id)))
-        .filter(AuditRun.compliance_score < 50)
+        .filter(AuditRun.audit_id.in_(latest), AuditRun.compliance_score < 50)
         .scalar()
         or 0
     )
@@ -85,7 +77,13 @@ def index():
     unvalidated_datasets = total_datasets - validated_datasets
 
     # --- Violation counts ---
-    active_violations = db.session.query(func.count(AuditResult.result_id)).scalar() or 0
+    # "Active" violations are those found by the latest audit of each dataset.
+    active_violations = (
+        db.session.query(func.count(AuditResult.result_id))
+        .filter(AuditResult.audit_id.in_(latest))
+        .scalar()
+        or 0
+    )
     violations_this_week = (
         db.session.query(func.count(AuditResult.result_id))
         .join(AuditRun, AuditResult.audit_id == AuditRun.audit_id)
@@ -95,26 +93,30 @@ def index():
     )
     high_violations = (
         db.session.query(func.count(AuditResult.result_id))
-        .filter(func.lower(AuditResult.severity) == "high")
+        .filter(AuditResult.audit_id.in_(latest), func.lower(AuditResult.severity) == "high")
         .scalar()
         or 0
     )
     critical_violations = (
         db.session.query(func.count(AuditResult.result_id))
-        .filter(func.lower(AuditResult.severity) == "critical")
+        .filter(AuditResult.audit_id.in_(latest), func.lower(AuditResult.severity) == "critical")
         .scalar()
         or 0
     )
 
     # --- Overall health ring ---
-    avg_score = db.session.query(func.avg(AuditRun.compliance_score)).scalar()
+    avg_score = (
+        db.session.query(func.avg(AuditRun.compliance_score))
+        .filter(AuditRun.audit_id.in_(latest))
+        .scalar()
+    )
     if avg_score is None:
         overall_health = None
         health_label = "No scores yet"
         health_gradient = None
     else:
         overall_health = max(0, min(100, round(float(avg_score))))
-        health_label, health_tone = health_band(overall_health)
+        health_label, health_tone = score_status(overall_health)
         health_gradient = (
             f"conic-gradient({TONE_COLORS[health_tone]} 0% {overall_health}%, "
             f"var(--color-border) {overall_health}% 100%)"
@@ -165,7 +167,7 @@ def index():
     recent_audits = []
     for audit, dataset in rows:
         score = audit.compliance_score
-        status, tone = score_band(score)
+        status, tone = score_status(float(score) if score is not None else None, has_policy_gap(audit))
         recent_audits.append(
             {
                 "audit_id": audit.audit_id,
@@ -181,6 +183,7 @@ def index():
     category_counts = (
         db.session.query(ComplianceRule.category, func.count(AuditResult.result_id))
         .join(AuditResult, AuditResult.rule_id == ComplianceRule.rule_id)
+        .filter(AuditResult.audit_id.in_(latest))
         .group_by(ComplianceRule.category)
         .order_by(func.count(AuditResult.result_id).desc())
         .all()

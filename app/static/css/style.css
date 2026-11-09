@@ -691,7 +691,7 @@ body {
 .check.fail .check-status { color: var(--color-danger); }
 .check-note { margin: 14px 0 0; font-size: 12px; color: var(--color-text-muted); }
 
-/* ---------- Proceed button ---------- */
+/* ---------- Proceed button (disabled until the audit engine exists) ---------- */
 .proceed-button { margin-top: 0; padding: 14px; font-size: 15px; }
 .proceed-button:disabled { opacity: 0.45; cursor: not-allowed; }
 .proceed-button:disabled:hover { background: var(--color-primary); }
@@ -831,6 +831,7 @@ body {
 .req-obligation { margin-top: 4px; font-size: 12px; color: var(--color-text-muted); }
 .req-reco { margin-top: 6px; font-size: 12px; font-weight: 600; color: var(--color-primary-dark); }
 
+.report-head + .issues-bar + .tabs + .report-table-panel + .panel { margin-bottom: 0; }
 .record-detail { color: var(--color-text-muted); font-size: 12px; }
 .audit-table code { font-size: 12px; }
 .panel-header .sub { font-size: 12px; color: var(--color-text-muted); }
@@ -846,6 +847,15 @@ body {
   .tabs { overflow-x: auto; }
   .report-table td, .report-table th { padding-left: 12px; padding-right: 12px; }
 }
+
+/* ---------- Reports list ---------- */
+.list-table td, .list-table th { padding-top: 14px; padding-bottom: 14px; }
+.list-table td:nth-child(2) { width: auto; }
+.report-code, .report-dataset { color: var(--color-text); text-decoration: none; font-weight: 600; }
+.report-code { color: var(--color-primary-dark); }
+.report-code:hover, .report-dataset:hover { text-decoration: underline; }
+.list-pager { padding: 0 18px 16px; }
+.empty-state a { color: var(--color-primary); font-weight: 600; }
 
 /* ============================================================
    REPORTS LIST (Figure 4.9)
@@ -1001,13 +1011,11 @@ body {
   .print-page h2, .print-table, .print-score { break-inside: avoid; }
   @page { margin: 18mm; }
 }
-/* ---- Sign up ---- */
-.auth-switch { text-align: center; margin: 18px 0 0; font-size: 13px; color: var(--color-text-muted); }
-.field-hint { margin: 6px 0 0; font-size: 12px; color: var(--color-text-muted); }
 
 /* ---- Sign up ---- */
 .auth-switch { text-align: center; margin: 18px 0 0; font-size: 13px; color: var(--color-text-muted); }
 .field-hint { margin: 6px 0 0; font-size: 12px; color: var(--color-text-muted); }
+
 /* ---------- My profile ---------- */
 .pf-grid { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
 .pf-forms { display: grid; gap: 16px; max-width: 560px; }
@@ -1027,3 +1035,67 @@ body {
 .btn-primary.pf-save { width: auto; margin-top: 4px; padding: 10px 20px; }
 .pf-readonly { background: #F1F5F9; color: var(--color-text-muted); cursor: not-allowed; }
 @media (max-width: 860px) { .pf-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Profile: photo, two-column fields ---------- */
+.avatar-photo { object-fit: cover; display: block; }
+.pf-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .pf-two { grid-template-columns: 1fr; } }
+.pf-photo-form { margin-top: 16px; }
+.pf-photo-choose {
+  position: relative;
+  display: inline-block; padding: 8px 14px; border: 1px dashed var(--color-border);
+  border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--color-primary-dark);
+  cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pf-photo-choose:hover { background: var(--color-primary-tint); }
+.pf-photo-choose input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.pf-photo-choose:focus-within { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.pf-link-button {
+  display: block; margin: 8px auto 0; padding: 0; border: none; background: none;
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--color-primary); cursor: pointer;
+}
+.pf-link-button:hover { text-decoration: underline; }
+.pf-link-button.danger { color: var(--color-danger); }
+.avatar, .pf-avatar { flex-shrink: 0; }
+
+/* ---------- Policy alignment ---------- */
+.policy-panel { padding: 18px 18px 8px; margin-bottom: 16px; }
+.policy-quote { font-style: italic; }
+.policy-note { margin: 12px 0 8px; font-size: 12px; color: var(--color-text-muted); }
+.muted-text { color: var(--color-text-muted); font-size: 13px; }
+
+/* ---------- Administrator pages ---------- */
+.adm-section { margin-top: 16px; }
+.adm-heading { margin: 24px 0 12px; font-size: 15px; }
+.adm-table td, .adm-table th { vertical-align: top; }
+.adm-table code { font-size: 12px; background: #F1F5F9; padding: 2px 6px; border-radius: 4px; }
+.adm-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.adm-actions form { margin: 0; }
+.adm-user { display: flex; align-items: center; gap: 10px; }
+.row-off { opacity: 0.55; }
+.btn-small {
+  display: inline-block; padding: 7px 14px; border: none; border-radius: 8px; cursor: pointer;
+  background: var(--color-primary); color: #fff; font: inherit; font-size: 13px; font-weight: 600; text-decoration: none;
+}
+.btn-small:hover { background: var(--color-primary-dark); }
+.btn-small.ghost { background: #F1F5F9; color: var(--color-text); }
+.link-button { border: none; background: none; padding: 0; font: inherit; font-size: 12px; font-weight: 600; color: var(--color-primary); cursor: pointer; }
+.link-button.danger { color: var(--color-danger); }
+.switch { width: 40px; height: 22px; border-radius: 11px; border: none; background: #CBD5E1; position: relative; cursor: pointer; padding: 0; }
+.switch span { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.switch.on { background: var(--color-primary); }
+.switch.on span { left: 21px; }
+.adm-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.adm-card-label { font-size: 12px; color: var(--color-text-muted); }
+.adm-card-value { font-size: 26px; font-weight: 700; margin: 6px 0 4px; }
+.adm-card-note { font-size: 12px; color: var(--color-text-muted); }
+@media (max-width: 900px) { .adm-cards { grid-template-columns: 1fr 1fr; } }
+.adm-form { max-width: 640px; }
+.adm-textarea, .adm-select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 8px;
+  font: inherit; font-size: 14px; background: #fff;
+}
+.adm-buttons { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
+.adm-filter { margin: 0; }
+.adm-filter .adm-select { width: auto; padding: 6px 10px; }
+.panel-header a.btn-small { color: #fff; font-size: 13px; }

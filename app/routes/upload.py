@@ -19,7 +19,8 @@ from werkzeug.utils import secure_filename
 
 from app.auditing.dataset_schema import REQUIRED_COLUMNS, validate_dataset
 from app.auditing.policy_reader import ALLOWED_EXTENSIONS, PolicyReadError, read_policy
-from app.auditing.runner import run_audit
+from app.activity import log_event
+from app.auditing.runner import NoRulesError, run_audit
 from app.decorators import role_required
 from app.extensions import db
 from app.models import Dataset, PolicyDocument
@@ -124,6 +125,7 @@ def upload_policy():
         flash("The file could not be saved on the server. Please try again.", "error")
         return redirect(url_for("upload.index"))
 
+    log_event("policy_uploaded", document.file_name)
     db.session.commit()
     flash(f"Policy document uploaded: {len(document.content_text.split()):,} words read.", "success")
     return redirect(url_for("upload.index"))
@@ -168,6 +170,7 @@ def handle_upload():
 
     # 5. Record whether the dataset passed, and finish the save.
     dataset.schema_validated = result.passed
+    log_event("dataset_uploaded", f"{dataset.file_name}: {'passed' if result.passed else 'failed'} validation")
     db.session.commit()
 
     return redirect(url_for("upload.result", dataset_id=dataset.dataset_id))
@@ -212,6 +215,10 @@ def proceed(dataset_id):
     # Run the audit. Whatever goes wrong, the user gets a message, not a crash.
     try:
         audit, outcome = run_audit(dataset, current_user, stored_path(dataset_id))
+    except NoRulesError:
+        db.session.rollback()
+        flash("No audit rules are switched on. Ask an administrator to switch on at least one rule that checks data.", "error")
+        return redirect(url_for("upload.result", dataset_id=dataset_id))
     except Exception:
         db.session.rollback()
         current_app.logger.exception("Audit failed for dataset %s", dataset_id)

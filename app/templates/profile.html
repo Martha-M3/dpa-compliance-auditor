@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% from "_avatar.html" import avatar %}
+
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+  <div class="pf-grid">
+
+    {# Left: who you are, and your picture #}
+    <aside class="panel pf-identity">
+      {{ avatar(current_user, 'pf-avatar') }}
+      <h3 class="pf-name">{{ current_user.display_name }}</h3>
+      <span class="badge {{ 'warn' if current_user.role == 'Administrator' else 'good' }}">{{ current_user.role_label }}</span>
+      {% if current_user.job_title or current_user.department %}
+        <p class="pf-meta">{{ [current_user.job_title, current_user.department]|select|join(' · ') }}</p>
+      {% endif %}
+      <p class="pf-meta">{{ current_user.email or 'No email address yet' }}</p>
+      <p class="pf-meta">Member since {{ member_since }}</p>
+
+      <form class="pf-photo-form" method="post" action="{{ url_for('account.upload_photo') }}" enctype="multipart/form-data">
+        <label class="pf-photo-choose">
+          <input type="file" name="photo" accept="image/png,image/jpeg,image/webp" id="photo-input">
+          <span id="photo-label">Choose a picture</span>
+        </label>
+        <button type="submit" class="pf-link-button" id="photo-save" hidden>Upload this picture</button>
+        <p class="field-hint">PNG, JPG or WebP, up to 2 MB.</p>
+      </form>
+      {% if current_user.photo_filename %}
+        <form method="post" action="{{ url_for('account.remove_photo') }}">
+          <button type="submit" class="pf-link-button danger">Remove picture</button>
+        </form>
+      {% endif %}
+
+      <dl class="pf-stats">
+        {% for label, value in stats %}
+          <div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>
+        {% endfor %}
+      </dl>
+    </aside>
+
+    {# Right: the things you can change #}
+    <div class="pf-forms">
+
+      <section class="panel">
+        <div class="panel-header">
+          <h4>Personal details</h4>
+        </div>
+        <form method="post" action="{{ url_for('account.change_details') }}">
+          <div class="field">
+            <label for="username">Username</label>
+            <input type="text" id="username" value="{{ current_user.username }}" readonly class="pf-readonly">
+            <p class="field-hint">You sign in with this. Only an administrator can change it.</p>
+          </div>
+          <div class="field">
+            <label for="full_name">Full name</label>
+            <input type="text" id="full_name" name="full_name" value="{{ form.full_name }}" autocomplete="name" maxlength="150">
+          </div>
+          <div class="field">
+            <label for="email">Email address</label>
+            <input type="email" id="email" name="email" value="{{ form.email }}" autocomplete="email" required>
+            <p class="field-hint">Used for password-reset emails and for signing in with Google.</p>
+          </div>
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input type="text" id="phone" name="phone" value="{{ form.phone }}" autocomplete="tel" maxlength="30" placeholder="+254 712 345 678">
+          </div>
+          <div class="pf-two">
+            <div class="field">
+              <label for="job_title">Job title</label>
+              <input type="text" id="job_title" name="job_title" value="{{ form.job_title }}" maxlength="100">
+            </div>
+            <div class="field">
+              <label for="department">Department</label>
+              <input type="text" id="department" name="department" value="{{ form.department }}" maxlength="100">
+            </div>
+          </div>
+          <button type="submit" class="btn-primary pf-save">Save details</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h4>Change password</h4>
+        </div>
+        <form method="post" action="{{ url_for('account.change_password') }}">
+          <div class="field">
+            <label for="current_password">Current password</label>
+            <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
+          </div>
+          <div class="field">
+            <label for="new_password">New password</label>
+            <input type="password" id="new_password" name="new_password" autocomplete="new-password" minlength="{{ min_length }}" required>
+            <p class="field-hint">At least {{ min_length }} characters.</p>
+          </div>
+          <div class="field">
+            <label for="confirm_password">Confirm new password</label>
+            <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" minlength="{{ min_length }}" required>
+          </div>
+          <button type="submit" class="btn-primary pf-save">Change password</button>
+        </form>
+      </section>
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    // Show the chosen file's name and reveal the upload button. The page works without this.
+    (function () {
+      var input = document.getElementById("photo-input");
+      if (!input) { return; }
+      input.addEventListener("change", function () {
+        if (input.files.length) {
+          document.getElementById("photo-label").textContent = input.files[0].name;
+          document.getElementById("photo-save").hidden = false;
+        }
+      });
+    })();
+  </script>
+{% endblock %}

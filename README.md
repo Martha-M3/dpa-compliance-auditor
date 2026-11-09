@@ -2,49 +2,44 @@
 
 **An Automated Data Protection Act Compliance Auditing System Using NLP for Kenyan Organizations**
 
-A web application that checks an organization's personal-data records against the
-Kenya Data Protection Act, 2019. A Compliance Officer uploads a dataset, the system
-validates it, audits every record against rules held in a knowledge base, and produces
-a compliance score, a list of violations and a report with recommendations.
+A web application that checks an organization's personal-data records against the Kenya Data Protection Act, 2019. A Compliance Officer uploads a dataset and a policy document. The system validates the data, audits every active record against the consent and retention rules, compares the policy with the Act, and produces a compliance score, a list of violations and a report. An Administrator manages the rules and the users.
 
-This is an undergraduate final-year project (Computer Science, Strathmore University)
-by Martha Muinde. It is a proof of concept built on simulated data. It is **not legal
-advice**, and its findings should be reviewed by a qualified person.
+This is an undergraduate final-year project (Computer Science, Strathmore University) by Martha Muinde. It is a proof of concept built on simulated data. It is **not legal advice**, and its findings should be reviewed by a qualified person.
 
 ---
 
 ## What it does
 
-1. **Upload and validate a dataset.** The CSV is checked against a standard
-   five-column schema. A file that fails cannot be audited, and the page says exactly
-   which rows are wrong.
-2. **Run an automated audit.** Each active record is checked against the compliance
-   rules and every breach is saved with its severity and a plain-English explanation.
-3. **Read the results.**
-   - **Dashboard:** overall compliance health, violations by severity and category,
-     recent audits and alerts.
-   - **Audit screen:** score, issues by severity, a tab for each area of the Act,
-     the result of each rule, and the list of affected records.
-   - **Reports:** a filterable list of all audits with a summary preview and a
-     printable one-page summary that can be saved as a PDF.
-4. **Upload an organization policy document** (PDF, Word or text). The text is
-   extracted and stored for the policy comparison planned next.
-5. **Sign in** with a username and password, with a "Forgot password?" email link,
-   or with a Google account that is already registered. Two roles are supported:
-   Compliance Officer and Administrator.
+**For a Compliance Officer**
+1. **Upload and validate a dataset.** A CSV is checked against a five-column schema. A file that fails cannot be audited, and the page says exactly which rows are wrong.
+2. **Upload a policy document** (PDF, Word or text). Its text is extracted and stored.
+3. **Run an audit.** Each active record is checked against the rules that are switched on. The policy is compared with the obligations of the Act using TF-IDF and cosine similarity, and each topic is marked *Addressed*, *Partly addressed* or *Not found*.
+4. **Read the results:** dashboard, audit page (score, issues by severity, results by topic, policy alignment, affected records), reports list with filters, and a **PDF report** download.
 
-### What is checked today
+**For an Administrator**
+- **Compliance Rules:** switch rules on or off, edit them, add new ones, and review **rule candidates extracted from the Act** by the language-processing step.
+- **User Management:** create accounts, change usernames and roles, reset passwords, deactivate and reactivate accounts.
+- **System Logs:** who did what and when. Four monitoring figures on the rules page.
+
+**For everyone:** sign in with a password or a registered Google account, sign up (as a Compliance Officer), reset a forgotten password by e-mail, and edit a profile with a picture.
+
+### How the audit decides
 
 | Area | Rule | A record breaks it when |
 |---|---|---|
-| Consent | Processing without consent | `consent_status` is `No` but the record is still `Active` |
-| Data retention | Retained beyond retention period | `collection_date` + `retention_period` has passed but the record is still `Active` |
+| Consent (Sections 30 and 32) | Processing without consent | `consent_status` is `No` but the record is still `Active` |
+| Data retention (Section 39) | Retained beyond retention period | `collection_date` + `retention_period` is before the audit date but the record is still `Active` |
 
-Only `Active` records are audited, because an inactive record is no longer being
-processed. The **compliance score** is the percentage of records with no violation.
+Only `Active` records are audited. The **compliance score** is the percentage of records with no violation. 80 or more is *Compliant*, 50 to 79 *Action Required*, below 50 *Critical Violations*; a compliant dataset whose policy leaves a topic *Not found* is marked *Review*. These bands are working values chosen for the prototype; the Act prescribes no scores.
 
-The rules live in `data/knowledge_base/dpa_rules.json`, not in the code, so a new
-rule can be added without changing any Python.
+### The language-processing part
+
+1. `app/nlp/act_reader.py` reads the Act's PDF (scanned text with page headers and margin notes) into numbered provisions.
+2. `app/nlp/extractor.py` uses **spaCy** to find duties ("shall", "must"), who must do what, and whether a provision concerns consent or retention. Duties on those topics become candidate rules.
+3. An administrator approves or rejects each candidate. Approved rules join the policy comparison.
+4. `app/nlp/similarity.py` compares policy statements with the rules (TF-IDF, cosine similarity, word stems, domain concept words and a topic gate). It is plain Python so the website needs no spaCy.
+
+Measured results are produced by `scripts/evaluate_nlp_extraction.py` and `scripts/evaluate_policy_comparison.py`; see Chapter 5 of the report.
 
 ### Dataset format
 
@@ -58,73 +53,46 @@ A CSV (UTF-8) with a heading row and these five columns:
 | `retention_period` | `5 years`, `6 months` or `90 days` |
 | `record_status` | `Active` or `Inactive` |
 
-
-
 ## Technology
 
-- **Language and framework:** Python 3.11, Flask
-- **Database:** PostgreSQL, accessed through Flask-SQLAlchemy
-- **Authentication:** Flask-Login
-- **Data handling:** pandas
-- **Policy documents:** pypdf (PDF), built-in `zipfile` (Word)
-- **Test data:** Faker
-- **Interface:** server-rendered HTML templates, plain CSS and a little JavaScript
-- **Planned:** spaCy and scikit-learn for the NLP stage
+Python, Flask, PostgreSQL (Flask-SQLAlchemy, psycopg2), Flask-Login, pandas, pypdf, ReportLab (PDF), spaCy (language processing, development only), pytest, Faker. HTML templates, plain CSS and a little JavaScript.
 
 ## Project structure
 
 ```
-dpa-compliance-auditor/
-├── app/
-│   ├── __init__.py            App factory: creates and configures the Flask app
-│   ├── auditing/
-│   │   ├── dataset_schema.py  Validates an uploaded CSV
-│   │   ├── engine.py          Applies the rules to each record and scores the audit
-│   │   ├── runner.py          Connects the engine to the database
-│   │   └── policy_reader.py   Extracts text from PDF, Word and text policies
-│   ├── models/                Database tables (users, datasets, audits, rules, ...)
-│   ├── routes/                Pages: auth, dashboard, upload, reports
-│   ├── templates/             HTML pages
-│   ├── static/                CSS and JavaScript
-│   ├── google_auth.py         Sign in with Google
-│   └── mailer.py              Sends password-reset emails
-├── data/
-│   ├── knowledge_base/        dpa_rules.json: the compliance rules
-│   └── simulated/             Generated test datasets and answer keys
-├── scripts/
-│   ├── generate_synthetic_dataset.py
-│   └── evaluate_audit_engine.py
-├── config.py                  Settings, read from the .env file
-├── run.py                     Starts the app
-├── schema.sql                 Creates the database tables
-└── requirements.txt           Python packages
+app/
+  auditing/    dataset validation, audit engine, policy reader, runner (no web code)
+  nlp/         Act reader, rule extractor (spaCy), similarity and policy check
+  models/      database tables
+  routes/      pages: auth, account, upload, dashboard, reports, admin
+  templates/   HTML pages          static/   CSS and JavaScript
+  rules_store.py  status.py  activity.py  pdf_report.py  google_auth.py  mailer.py
+data/
+  knowledge_base/   dpa_rules.json (starting rules), act_candidates.json (extracted candidates)
+  reference/        hand-labelled provisions and policy statements used to measure the NLP
+  raw/legal/        the Data Protection Act and the ODPC handbook (PDF)
+scripts/    data generator, evaluation scripts, rule extraction, environment report, database set-up
+tests/      80 automated tests
+migrations/ SQL to upgrade an existing database
+schema.sql  render.yaml  wsgi.py  requirements.txt  requirements-dev.txt
 ```
 
-## Getting started
+## Getting started (Windows, PowerShell)
 
-These steps are for Windows with PowerShell. You need Python 3.11 and PostgreSQL.
-
-### 1. Get the code and install the packages
+You need Python 3.11 and PostgreSQL.
 
 ```powershell
 git clone https://github.com/Martha-M3/dpa-compliance-auditor.git
 cd dpa-compliance-auditor
 py -3.11 -m venv .venv
 .venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-### 2. Create the database
-
-```powershell
+pip install -r requirements-dev.txt
+python -m spacy download en_core_web_sm
 psql -U postgres -c "CREATE DATABASE dpa_compliance_db;"
 psql -U postgres -d dpa_compliance_db -f schema.sql
 ```
 
-### 3. Create the `.env` file
-
-Create a file named `.env` in the project folder (it is ignored by Git, so your
-secrets are never uploaded):
+Create a `.env` file (it is ignored by Git):
 
 ```
 SECRET_KEY=a-long-random-string
@@ -135,109 +103,50 @@ DB_HOST=localhost
 DB_PORT=5432
 ```
 
-Generate a secret key with:
-`python -c "import secrets; print(secrets.token_hex(32))"`
-
-### 4. Create the first user
-
-There is no sign-up page yet, so create accounts from a Python prompt. Run `python`,
-then paste:
-
-```python
-from app import create_app
-from app.extensions import db
-from app.models import User
-
-app = create_app()
-with app.app_context():
-    user = User(username="officer", email="officer@example.com", role="ComplianceOfficer")
-    user.set_password("ChangeMe123")
-    db.session.add(user)
-    db.session.commit()
-```
-
-Use `role="Administrator"` for an administrator account.
-
-### 5. Run it
+Create the first accounts and start the system:
 
 ```powershell
+python seed_users.py      # prints a random password for 'admin' and 'officer' ONCE
 python run.py
 ```
 
-Open <http://127.0.0.1:5000>, choose the role, and sign in.
+Open <http://127.0.0.1:5000>. **Upgrading an older database?** Run `psql -U postgres -d dpa_compliance_db -f migrations/2026-11-admin-and-nlp.sql` once.
 
-## Optional settings
-
-Add these to `.env` only if you want them. The app works without them.
-
-**Password-reset emails.** Without these, the reset link is printed in the terminal
-instead of being emailed, which is enough for development.
-
-```
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your.address@gmail.com
-MAIL_PASSWORD=your-app-password
-```
-
-**Sign in with Google.** Create an OAuth client in Google Cloud and add the redirect
-addresses `http://127.0.0.1:5000/auth/google/callback` and
-`http://localhost:5000/auth/google/callback`. Then:
-
-```
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-```
-
-The "Continue with Google" button appears once both are set. Google sign-in only
-admits people whose verified Google email matches an existing account.
+Optional `.env` settings: `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` (password-reset e-mails; without them the link is printed in the terminal) and `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (the Google button; add `http://127.0.0.1:5000/auth/google/callback` as a redirect address in Google Cloud).
 
 ## Try it with sample data
 
-Generate a test dataset in which some records are deliberately non-compliant, then
-upload it on the **Upload Data** page:
-
 ```powershell
-python scripts/generate_synthetic_dataset.py
+python scripts/generate_synthetic_dataset.py --rows 300 --no-consent 30 --out data/simulated/my_dataset.csv
 ```
 
-This writes `data/simulated/synthetic_dataset.csv` and an answer key that lists the
-records that were made non-compliant.
+Upload the file on **Upload Data**. Options: `--rows`, `--no-consent`, `--active-if-expired`, `--active-if-valid`, `--years`, `--id-prefix`, `--random` (run with `--help`). Each run also writes an answer key beside the dataset.
 
-## Testing
-
-Check the audit engine against the answer key. The script reports, for each rule, how
-many violations were expected and found, with precision, recall and F1:
+## Testing and evaluation
 
 ```powershell
-python scripts/generate_synthetic_dataset.py --rows 5000 --out data/simulated/perf_5000.csv
-python scripts/evaluate_audit_engine.py data/simulated/perf_5000.csv
+pytest                                                    # 80 tests; results in tests/results/test_record.json
+python scripts/evaluate_audit_engine.py data/simulated/synthetic_dataset.csv
+python scripts/evaluate_nlp_extraction.py data/reference/act_reference_heldout.csv
+python scripts/evaluate_policy_comparison.py
+python scripts/extract_rules_from_act.py                  # rebuilds data/knowledge_base/act_candidates.json
+python scripts/print_environment.py                       # versions of everything, for the report
 ```
 
-The engine and the generator share the same definition of a violation, so a perfect
-score here shows the engine is **functionally correct**. It does not measure how well
-the planned NLP stage will read real legal text. That needs a separate, hand-annotated
-reference set.
+The audit engine and its test data share one definition of a violation, so agreement shows the engine is *functionally correct*. The language-processing measurements use provisions and statements labelled by hand; the statement set was written by the researcher, so it is not an independent test.
+
+## Deployment
+
+`render.yaml` describes a free Render web service and database. Set `ADMIN_PASSWORD` (and `ADMIN_EMAIL`) on Render's Environment page to create the first Administrator. On Render's free plan uploaded files do not survive a restart.
 
 ## Known limitations
 
-- The audit covers two obligations, consent and retention, as set out in the project
-  scope. It does not cover the whole Act.
-- Policy documents are uploaded and read, but not yet compared with the Act.
+- Two obligations are audited: consent and retention (the scope of the project).
+- Policy comparison is approximate. It shows where a policy appears to address a topic; a person must read the statement.
 - Scanned (picture-only) documents cannot be read. Only English text is supported.
-- Score bands and severity levels are provisional and should be confirmed with the
-  supervisor.
-- The "Download PDF" button opens the browser's print dialog. Choose *Save as PDF*.
-- Requests for password-reset emails are not rate-limited.
-
-## Troubleshooting
-
-- **"Application Control policy has blocked this file" when starting the app.**
-  Windows has blocked a newly installed package. Recreate the virtual environment with
-  Python 3.11 and reinstall from `requirements.txt`, which pins versions known to work.
-- **Google shows `redirect_uri_mismatch`.** The address in your browser must match a
-  redirect address registered in Google Cloud. Use `127.0.0.1` or `localhost`
-  consistently.
+- Score bands, severities and the interpretation of Sections 30, 32 and 39 are the researcher's, not legal advice.
+- Rule extraction reads the Act's duties but misses restrictive "may only" provisions and is tuned on a small hand-labelled set.
+- The Settings page of the original wireframe was not built.
 
 ## Author
 
